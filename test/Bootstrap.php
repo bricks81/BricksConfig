@@ -8,7 +8,7 @@ use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
 
 error_reporting(E_ALL | E_STRICT);
-chdir(__DIR__);
+//chdir(__DIR__);
 
 class Bootstrap {
 	
