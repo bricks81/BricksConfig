@@ -8,7 +8,6 @@ use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
 
 error_reporting(E_ALL | E_STRICT);
-//chdir(__DIR__);
 
 class Bootstrap {
 	
@@ -101,7 +100,7 @@ class Bootstrap {
             'Zend\Loader\StandardAutoloader' => array(
                 'autoregister_zf' => true,
                 'namespaces' => array(
-                    __NAMESPACE__ => __DIR__ . '/' . __NAMESPACE__,
+                    __NAMESPACE__ => getcwd() . '/' . __NAMESPACE__,
                 ),
             ),
         ));
@@ -113,7 +112,7 @@ class Bootstrap {
      */
     protected static function findParentPath($path)
     {
-        $dir = __DIR__;
+        $dir = getcwd();
         $previousDir = '.';
         while (!is_dir($dir . '/' . $path)) {
             $dir = dirname($dir);
