@@ -1,6 +1,6 @@
 {
     "name": "bricks81/bricks-config",
-    "description": "Switch config values based on namespaces.",
+    "description": "Bricks CMS Framework Configuration Managment",
     "license": "GPLv3",
     "authors": [
         {
@@ -8,7 +8,7 @@
             "email": "kontakt@28-n-half.de"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
     	"php": ">=5.3.3"   	    	        
     },
