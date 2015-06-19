@@ -21,8 +21,7 @@ class ConfigFactory implements FactoryInterface {
 	public function createService(ServiceLocatorInterface $sl){
 		$cfg = $sl->get('Config');
 		$configClass = $cfg['BricksConfig']['BricksConfig']['BricksConfig']['configClass'];
-		$eventManager = $sl->get('EventManager');
-		$service = new $configClass(new Config($cfg,true),$eventManager);
+		$service = new $configClass(new Config($cfg,true));
 		return $service;
 	}
 	

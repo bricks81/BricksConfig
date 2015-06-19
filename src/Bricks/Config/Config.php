@@ -24,52 +24,33 @@ class Config {
 	protected $configs = array();
 	
 	/**
-	 * @var EventManager
-	 */
-	protected $event;
-	
-	/**
-	 * Will be executed if the configuration has been changed
-	 * 
-	 * @var array
-	 */
-	protected $setListeners = array();
-	
-	/**
 	 * @param ZendConfig $zconfig
 	 */
-	public function __construct(ZendConfig $zconfig,EventManager $event){
-		$this->zconfig = $zconfig;
-		$this->setEventManager($event);
-	}
-		
-	/**
-	 * @param EventManager $event
-	 */
-	public function setEventManager(EventManager $event){
-		$this->event = $event;
-	}
-	
-	/**
-	 * @return EventManager
-	 */
-	public function getEventManager(){
-		return $this->event;
+	public function __construct(ZendConfig $zconfig){
+		$this->zconfig = $zconfig;		
 	}
 	
 	/**
 	 * @param string $module
 	 * @return Config
 	 */
-	public function getConfig($module=null){
+	public function getConfig($module=null,$namespace=null){
 		if(null === $module){
 			return $this;
 		}
-		if(!isset($this->configs[$module])){
+		$namespace = $namespace?:$module;
+		if(!isset($this->configs[$module][$namespace])){
 			$class = $this->zconfig->BricksConfig->BricksConfig->BricksConfig->defaultConfigClass;
-			$this->configs[$module] = new $class($this,$module);
+			$this->configs[$module][$namespace] = new $class($this,$module);
 		}
-		return $this->configs[$module];
+		return $this->configs[$module][$namespace];
+	}
+	
+	/**
+	 * @return \Zend\Config\Config
+	 */
+	public function getZendConfig(){
+		return $this->zconfig;
 	}
 	
 	/**
@@ -129,6 +110,7 @@ class Config {
 	 * @param string $module
 	 * @param string $namespace
 	 */
+	/*
 	public function set($path,$value,$module,$namespace=null){
 		$namespace = null === $namespace ? $module : $namespace;
 		$pointer = $this->zconfig->BricksConfig->$module->$namespace;
@@ -158,5 +140,6 @@ class Config {
 			'namespace' => $namespace
 		));
 	}
+	*/
 	
 }

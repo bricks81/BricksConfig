@@ -21,12 +21,19 @@ class DefaultConfig implements ConfigInterface {
 	protected $moduleName;
 	
 	/**
+	 * @var string
+	 */
+	protected $namespace;
+	
+	/**
 	 * @param array $config
 	 * @param string $moduleName
+	 * @param string $defaultNamespace
 	 */
-	public function __construct(Config $config,$moduleName){
+	public function __construct(Config $config,$moduleName,$defaultNamespace=null){
 		$this->setConfig($config);		
-		$this->setModuleName($moduleName);		
+		$this->setModuleName($moduleName);
+		$this->switchNamespace($defaultNamespace?:$moduleName);		
 	}
 	
 	/**
@@ -37,10 +44,12 @@ class DefaultConfig implements ConfigInterface {
 	}
 	
 	/**
+	 * @param string $module
+	 * @param string $namespace
 	 * @return \Bricks\Config\Config
 	 */
-	public function getConfig(){
-		return $this->config;
+	public function getConfig($module=null,$namespace=null){
+		return $this->config->getConfig($module,$namespace);
 	}
 	
 	/**
@@ -58,10 +67,25 @@ class DefaultConfig implements ConfigInterface {
 	}
 	
 	/**
+	 * @param string $namespace
+	 */
+	public function switchNamespace($namespace=null){
+		$this->namespace = $namespace;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getNamespace(){
+		return $this->namespace;
+	}
+	
+	/**
 	 * (non-PHPdoc)
 	 * @see \Bricks\Config\ConfigInterface::getArray()
 	 */
 	public function getArray($namespace=null){
+		$namespace = $namespace?:$this->getNamespace();
 		return $this->getConfig()->getArray($this->getModuleName(),$namespace);
 	}
 	
@@ -70,6 +94,7 @@ class DefaultConfig implements ConfigInterface {
 	 * @see \Bricks\Config\ConfigInterface::get()
 	 */
 	public function get($path,$namespace=null){
+		$namespace = $namespace?:$this->getNamespace();
 		return $this->getConfig()->get($path,$this->getModuleName(),$namespace);		
 	}
 	
@@ -78,6 +103,7 @@ class DefaultConfig implements ConfigInterface {
 	 * @see \Bricks\Config\ConfigInterface::set()
 	 */
 	public function set($path,$value,$namespace=null){
+		$namespace = $namespace?:$this->getNamespace();
 		$this->getConfig()->set($path,$value,$this->getModuleName(),$namespace);
 	}
 	
