@@ -110,7 +110,6 @@ class Config {
 	 * @param string $module
 	 * @param string $namespace
 	 */
-	/*
 	public function set($path,$value,$module,$namespace=null){
 		$namespace = null === $namespace ? $module : $namespace;
 		$pointer = $this->zconfig->BricksConfig->$module->$namespace;
@@ -118,28 +117,54 @@ class Config {
 		$key = array_pop($parts);
 		if(0 == count($parts)){
 			if(is_array($value)){
-				$value = new ZendConfig($value,true);
+				$set = new ZendConfig($value,true);
+			}			
+		} else {	
+			foreach($parts AS $i){
+				if(!isset($pointer->$i)){
+					$pointer->$i = new ZendConfig(array(),true);
+				}
+				$pointer = &$pointer->$i;			
 			}
-			$pointer->$key = $value;
-			return;
-		}		
-		foreach($parts AS $i){
-			if(!isset($pointer->$i)){
-				$pointer->$i = new ZendConfig(array(),true);
+			if(is_array($value)){
+				$set = new ZendConfig($value,true);
 			}
-			$pointer = &$pointer->$i;			
 		}
-		if(is_array($value)){
-			$value = new ZendConfig($value,true);
+		$before = $pointer->$key;
+		$pointer->$key = $set;
+		$this->triggerSetEvent($path,$before,$set,$module,$namespace);
+	}	
+	
+	/**
+	 * Will be triggered if a variable has been setted
+	 * Other classes can listen to this event in order to take
+	 * action on there own if a config value changes
+	 * 
+	 * @param string $path
+	 * @param mixed $before
+	 * @param mixed $set
+	 * @param string $module
+	 * @param string $namespace
+	 */
+	protected function triggerSetEvent($path,$module,$namespace){
+		$var = $this->get($path,$module,$namespace);
+		if($var instanceof Zend_Config){
+			foreach($var AS $key => $value){
+				if($value instanceof Zend_Config){
+					$this->triggerSetEvent($path.'.'.$key,$module,$namespace);
+				} else {
+					$this->getEventManager()->trigger('BricksConfig::set('.$path.'.'.$key.')',$this,array(
+						'module' => $module,
+						'namespace' => $namespace
+					));
+				}
+			}
+		} else {
+			$this->getEventManager()->trigger('BricksConfig::set('.$path.')',$this,array(
+				'module' => $module,
+				'namespace' => $namespace
+			));
 		}
-		$pointer->$key = $value;
-		$this->getEventManager()->trigger('BricksConfig::set',$this,array(
-			'path' => $path,
-			'value' => $value,
-			'module' => $module,
-			'namespace' => $namespace
-		));
 	}
-	*/
 	
 }
