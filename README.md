@@ -1,15 +1,19 @@
 ## About
 
-Bricks Config contains an instance of your zend framework application configuration. All actions based on this config class will be made centralized.
-You can load or set the config values. The dot syntax allows you to define a "path" which will be mapped to the configs array.
+Bricks Config is used to get an accessable and centralized configuration on top of the zend configuration.
+
+Config contains an instance of your Zend Framework Application Configuration Object and adds the possibility to manipulate configuration parameters.
+
+You can load or set the config values. The dot syntax allows you to define a "path" which will be mapped to the configurations array.
  
+Each time you will use the set command. An Event will be triggered on which programs can listen to.
 
 ## Features
 - Centralized configuration
 - Namespaces
 
 ## Requires
-current nothing required
+Currently nothing required
 
 ### Installation
 
@@ -19,7 +23,7 @@ current nothing required
 
 #### Activate Modules
 
-Add the modules in your application.config.php:
+Add the Modules in your application.config.php:
 
 ```php
 	// ...    
@@ -60,7 +64,7 @@ Add the configuration for your module:
 
 ### Example
 
-This example will demonstrate the api that shouldn't change in future.
+This example will demonstrate the API that shouldn't change in future.
 
 ```php
 	// ...
