@@ -36,13 +36,21 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		),
 	);
 	
+	public function getTestConfig(){
+		$config = new Config(
+				new ZendConfig($this->testConfig,true),
+				Bootstrap::getServiceManager()->get('EventManager')
+		);
+		return $config;
+	}
+	
 	public function testGetInstance(){		
-		$config = new Config(new ZendConfig($this->testConfig));
+		$config = $this->getTestConfig();
 		$this->assertInstanceOf('Bricks\Config\DefaultConfig',$cfg = $config->getConfig('BricksConfig'));			
 	}	
 	
 	public function testArray(){
-		$config = new Config(new ZendConfig($this->testConfig));
+		$config = $this->getTestConfig();
 		$array = $config->getArray();
 		$this->assertEquals($array,$this->testConfig);
 		
@@ -58,7 +66,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function testPath(){
-		$config = new Config(new ZendConfig($this->testConfig));		
+		$config = $this->getTestConfig();		
 		$cfg = $config->getConfig('BricksConfig');
 		$this->assertTrue($cfg->get('testArray.multiple.bool'));
 		$this->assertFalse($cfg->get('testArray.multiple.bool','BricksConfigTest'));
@@ -71,7 +79,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function testSet(){
-		$config = new Config(new ZendConfig($this->testConfig,true));
+		$config = $this->getTestConfig();
 		$cfg = $config->getConfig('BricksConfig');
 		$cfg->set('array.array.array',false);
 		$this->assertFalse($cfg->get('array.array.array'));

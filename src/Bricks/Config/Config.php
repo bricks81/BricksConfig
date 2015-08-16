@@ -10,6 +10,8 @@ namespace Bricks\Config;
 
 use Zend\Config\Config as ZendConfig;
 use Zend\EventManager\EventManager;
+use Zend\Mvc\Service\EventManagerFactory;
+use Zend\EventManager\EventManagerInterface;
 
 class Config {
 	
@@ -24,10 +26,16 @@ class Config {
 	protected $configs = array();
 	
 	/**
+	 * @var \Zend\EventManager\EventManagerInterface
+	 */
+	protected $eventManager = null;
+	
+	/**
 	 * @param ZendConfig $zconfig
 	 */
-	public function __construct(ZendConfig $zconfig){
+	public function __construct(ZendConfig $zconfig,EventManagerInterface $eventManager){
 		$this->zconfig = $zconfig;		
+		$this->setEventManager($eventManager);
 	}
 	
 	/**
@@ -54,6 +62,20 @@ class Config {
 	}
 	
 	/**
+	 * @param \Zend\EventManager\EventManagerInterface $manager
+	 */
+	public function setEventManager(EventManagerInterface $manager){
+		$this->eventManager = $manager;		
+	}
+	
+	/**
+	 * @return \Zend\EventManager\EventManagerInterface
+	 */
+	public function getEventManager(){
+		return $this->eventManager;
+	}
+	
+	/**
 	 * @param string $module
 	 * @return array
 	 */
@@ -61,7 +83,10 @@ class Config {
 		if(null === $module){
 			return $this->zconfig->toArray();
 		}
-		$data = $this->zconfig->BricksConfig->$module->$module->toArray();
+		$data = array();
+		if(isset($this->zconfig->BricksConfig->$module->$module)){
+			$data = $this->zconfig->BricksConfig->$module->$module->toArray();
+		}
 		if(null !== $namespace && isset($this->zconfig->BricksConfig->$module->$namespace)){
 			$data = array_replace_recursive($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
 		}

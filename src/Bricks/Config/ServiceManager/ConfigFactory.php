@@ -19,9 +19,9 @@ class ConfigFactory implements FactoryInterface {
 	 * @see \Zend\ServiceManager\FactoryInterface::createService()
 	 */
 	public function createService(ServiceLocatorInterface $sl){
-		$cfg = $sl->get('Config');
+		$cfg = $sl->get('Config');		
 		$configClass = $cfg['BricksConfig']['BricksConfig']['BricksConfig']['configClass'];
-		$service = new $configClass(new Config($cfg,true));
+		$service = new $configClass(new Config($cfg,true),$sl->getEventManager());
 		return $service;
 	}
 	
