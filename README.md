@@ -83,6 +83,10 @@ This example will demonstrate the API that shouldn't change in future.
 	// ...
 ```
 
+## More Documentation
+
+Wiki: https://www.bricks-cms.org/wiki/index.php?title=BricksConfig
+
 ## Note
 
 Hope you will enjoy it.
