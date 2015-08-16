@@ -28,6 +28,11 @@ class Bootstrap {
 		$serviceManager->setService('ApplicationConfig', require './config/application.config.php');
 		$serviceManager->get('ModuleManager')->loadModules();
 		static::$serviceManager = $serviceManager;
+		\Zend\Loader\AutoloaderFactory::factory(array(
+			'Zend\Loader\ClassMapAutoloader' => array(
+        		'BricksConfig' => '../autoload_classmap.php'
+    		)
+		));	
 	}
 	
 	/**

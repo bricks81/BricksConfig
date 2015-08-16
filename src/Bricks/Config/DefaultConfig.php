@@ -46,7 +46,7 @@ class DefaultConfig implements ConfigInterface {
 	/**
 	 * @param string $module
 	 * @param string $namespace
-	 * @return \Bricks\Config\Config
+	 * @return DefaultConfig | Config
 	 */
 	public function getConfig($module=null,$namespace=null){
 		return $this->config->getConfig($module,$namespace);

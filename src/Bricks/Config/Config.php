@@ -32,7 +32,7 @@ class Config {
 	
 	/**
 	 * @param string $module
-	 * @return Config
+	 * @return DefaultConfig | Config
 	 */
 	public function getConfig($module=null,$namespace=null){
 		if(null === $module){
@@ -115,6 +115,7 @@ class Config {
 		$pointer = $this->zconfig->BricksConfig->$module->$namespace;
 		$parts = explode('.',$path);
 		$key = array_pop($parts);
+		$set = $value;
 		if(0 == count($parts)){
 			if(is_array($value)){
 				$set = new ZendConfig($value,true);
@@ -124,13 +125,17 @@ class Config {
 				if(!isset($pointer->$i)){
 					$pointer->$i = new ZendConfig(array(),true);
 				}
-				$pointer = &$pointer->$i;			
+				$pointer = &$pointer->$i;							
 			}
 			if(is_array($value)){
 				$set = new ZendConfig($value,true);
 			}
-		}
-		$before = $pointer->$key;
+		}		
+		if($pointer->$key instanceof ZendConfig){
+			$before = clone $pointer->$key;
+		} else {
+			$before = $pointer->$key;
+		}		
 		$pointer->$key = $set;
 		$this->triggerSetEvent($path,$before,$set,$module,$namespace);
 	}	
