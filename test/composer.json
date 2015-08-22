@@ -1,7 +1,7 @@
 {
     "name": "phpunit",
     "description": "PHPUnit",
-    "license": "GPLv3",
+    "license": "MIT",
     "authors": [
         {
             "name": "Sven Ullmann",

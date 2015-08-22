@@ -14,7 +14,12 @@
     	"zendframework/zend-config": "2.5.*@stable",
     	"zendframework/zend-servicemanager": "2.5.*@stable",
     	"zendframework/zend-modulemanager": "2.5.*@stable",
-    	"zendframework/zend-loader": "2.5.*@stable"  	        
+    	"zendframework/zend-loader": "2.5.*@stable",
+    	"zendframework/zend-mvc": "2.5.*@stable",
+    	"zendframework/zend-view": "2.5.*@stable",
+    	"zendframework/zend-serializer": "2.5.*@stable",
+    	"zendframework/zend-log": "2.5.*@stable",
+    	"zendframework/zend-i18n": "2.5.*@stable"   	        
     },
     "autoload": {
     	"classmap": ["Module.php"]
