@@ -1,7 +1,7 @@
 {
     "name": "bricks81/bricks-config",
     "description": "Bricks CMS Framework Configuration Managment",
-    "license": "GPLv3",
+    "license": "MIT",
     "authors": [
         {
             "name": "Sven Ullmann",
