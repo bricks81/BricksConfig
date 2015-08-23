@@ -86,13 +86,6 @@ class DefaultConfig implements ConfigInterface {
 	}
 	
 	/**
-	 * @param string $namespace
-	 */
-	public function switchNamespace($namespace=null){
-		$this->namespace = $namespace;
-	}
-	
-	/**
 	 * @return string
 	 */
 	public function getNamespace(){

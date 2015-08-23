@@ -52,9 +52,8 @@ class Config {
 	/**
 	 * @param ZendConfig $zconfig
 	 */
-	public function __construct(ZendConfig $zconfig,EventManagerInterface $eventManager){
-		$this->zconfig = $zconfig;		
-		$this->setEventManager($eventManager);
+	public function __construct(ZendConfig $zconfig){
+		$this->zconfig = new ZendConfig($zconfig,true);		
 	}
 	
 	/**
@@ -65,19 +64,15 @@ class Config {
 		if(null === $module){
 			return $this;
 		}
-		$namespace = $namespace?:$module;
+		$namespace = $namespace?:$module;		
 		if(!isset($this->configs[$module][$namespace])){
 			$class = $this->zconfig->BricksConfig->BricksConfig->BricksConfig->defaultConfigClass;
+			if(isset($this->zconfig->BricksConfig->BricksConfig->$namespace->defaultConfigClass)){
+				$class = $this->zconfig->BricksConfig->BricksConfig->$namespace->defaultConfigClass;
+			}
 			$this->configs[$module][$namespace] = new $class($this,$module);
 		}
 		return $this->configs[$module][$namespace];
-	}
-	
-	/**
-	 * @return \Zend\Config\Config
-	 */
-	public function getZendConfig(){
-		return $this->zconfig;
 	}
 	
 	/**
@@ -96,17 +91,22 @@ class Config {
 	
 	/**
 	 * @param string $module
+	 * @param string $namespace
 	 * @return array
+	 * @throws \RuntimeException
 	 */
 	public function getArray($module=null,$namespace=null){
-		if(null === $module){
-			return $this->zconfig->toArray();
-		}
 		$data = array();
+		if(null === $namespace){
+			if(!isset($this->zconfig->BricksConfig->$module)){
+				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
+			}
+			return $this->zconfig->BricksConfig->$module->toArray();
+		}
 		if(isset($this->zconfig->BricksConfig->$module->$module)){
 			$data = $this->zconfig->BricksConfig->$module->$module->toArray();
 		}
-		if(null !== $namespace && isset($this->zconfig->BricksConfig->$module->$namespace)){
+		if(isset($this->zconfig->BricksConfig->$module->$namespace)){
 			$data = array_replace_recursive($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
 		}
 		return $data;
@@ -116,7 +116,7 @@ class Config {
 	 * @param string $path
 	 * @param string $module
 	 * @param string $namespace
-	 * @return mixed
+	 * @return mixed | null
 	 */
 	public function get($path,$module,$namespace=null){
 		
@@ -145,6 +145,7 @@ class Config {
 		if(isset($pointer[$name])){
 			$value = $pointer[$name];
 		}
+		
 		return $value;
 	}
 	
@@ -196,6 +197,9 @@ class Config {
 	 * @param string $namespace
 	 */
 	protected function triggerSetEvent($path,$module,$namespace){
+		if(null == $this->getEventManager()){
+			return;
+		}
 		$var = $this->get($path,$module,$namespace);
 		if($var instanceof Zend_Config){
 			foreach($var AS $key => $value){

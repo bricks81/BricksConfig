@@ -7,44 +7,16 @@ use Zend\Config\Config as ZendConfig;
 use Bricks\Config\Config;
 class ConfigTest extends PHPUnit_Framework_TestCase {
 	
-	protected $testConfig = array(
-		'BricksConfig' => array(
-			'BricksConfig' => array(
-				'BricksConfig' => array(
-					'configClass' => 'Bricks\Config\Config',
-					'defaultConfigClass' => 'Bricks\Config\DefaultConfig',
-					'testString' => 'test',
-					'testArray' => array(
-						'multiple' => array(
-							'bool' => true,
-						),
-					),
-					'array' => array(
-						'array' => array(
-							'array' => 123
-						),
-					),
-				),
-				'BricksConfigTest' => array(
-					'testArray' => array(
-						'multiple' => array(
-							'bool' => false,
-						),
-					),					
-				),
-			),
-		),
-	);
-	
-	public function getTestConfig(){
-		$config = new Config(
-				new ZendConfig($this->testConfig,true),
-				Bootstrap::getServiceManager()->get('EventManager')
+	public function getTestConfig(ZendConfig $zconfig=null,$eventManager=null){
+		$zconfig = $zconfig?:Bootstrap::getServiceManager()->get('Config');
+		$config = new Config($zconfig);
+		$config->setEventManager(
+			$eventManager?:Bootstrap::getServiceManager()->get('EventManager')
 		);
 		return $config;
 	}
 	
-	public function testGetInstance(){		
+	public function testGetInstance(){	
 		$config = $this->getTestConfig();
 		$this->assertInstanceOf('Bricks\Config\DefaultConfig',$cfg = $config->getConfig('BricksConfig'));			
 	}	
