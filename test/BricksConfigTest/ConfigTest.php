@@ -22,7 +22,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	}	
 	
 	public function testArray(){
-		$config = $this->getTestConfig();
+		$config = $this->getTestConfig();		
 		$array = $config->getArray();
 		$this->assertEquals($array,$this->testConfig);
 		

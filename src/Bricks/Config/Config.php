@@ -52,7 +52,7 @@ class Config {
 	/**
 	 * @param ZendConfig $zconfig
 	 */
-	public function __construct(ZendConfig $zconfig){
+	public function __construct($zconfig){
 		$this->zconfig = new ZendConfig($zconfig,true);		
 	}
 	
