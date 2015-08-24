@@ -52,7 +52,7 @@ class DefaultConfig implements ConfigInterface {
 	public function __construct(Config $config,$moduleName,$defaultNamespace=null){
 		$this->setConfig($config);		
 		$this->setModuleName($moduleName);
-		$this->switchNamespace($defaultNamespace?:$moduleName);		
+		$this->namespace = $defaultNamespace?:$moduleName;		
 	}
 	
 	/**

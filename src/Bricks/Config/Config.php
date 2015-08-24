@@ -50,7 +50,7 @@ class Config {
 	protected $eventManager = null;
 	
 	/**
-	 * @param ZendConfig $zconfig
+	 * @param $zconfig
 	 */
 	public function __construct($zconfig){
 		$this->zconfig = new ZendConfig($zconfig,true);		
