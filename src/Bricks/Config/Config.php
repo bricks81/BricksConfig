@@ -97,18 +97,22 @@ class Config {
 	 */
 	public function getArray($module=null,$namespace=null){
 		$data = array();
-		if(null === $namespace){
+		if(null===$module){
+			$data = $this->zconfig->BricksConfig->toArray();
+		} elseif(null===$namespace){
 			if(!isset($this->zconfig->BricksConfig->$module)){
 				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
 			}
-			return $this->zconfig->BricksConfig->$module->toArray();
-		}
-		if(isset($this->zconfig->BricksConfig->$module->$module)){
-			$data = $this->zconfig->BricksConfig->$module->$module->toArray();
-		}
-		if(isset($this->zconfig->BricksConfig->$module->$namespace)){
-			$data = array_replace_recursive($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
-		}
+			$data = $this->zconfig->BricksConfig->$module->toArray();
+		} else {
+			if(!isset($this->zconfig->BricksConfig->$module)){
+				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
+			}
+			$data = array_replace_recursive(
+				$this->zconfig->BricksConfig->$module->$module->toArray(),
+				$this->zconfig->BricksConfig->$module->$namespace->toArray()
+			);
+		}		
 		return $data;
 	}
 	
@@ -156,7 +160,13 @@ class Config {
 	 * @param string $namespace
 	 */
 	public function set($path,$value,$module,$namespace=null){
-		$namespace = null === $namespace ? $module : $namespace;
+		$namespace = $namespace?:$module;
+		if(!isset($this->zconfig->BricksConfig->$module)){
+			$this->zconfig->BricksConfig->$module = new ZendConfig(array(),true);
+		}
+		if(!isset($this->zconfig->BricksConfig->$module->$namespace)){
+			$this->zconfig->BricksConfig->$module->$namespace = new ZendConfig(array(),true);
+		}
 		$pointer = $this->zconfig->BricksConfig->$module->$namespace;
 		$parts = explode('.',$path);
 		$key = array_pop($parts);
@@ -164,7 +174,7 @@ class Config {
 		if(0 == count($parts)){
 			if(is_array($value)){
 				$set = new ZendConfig($value,true);
-			}			
+			}
 		} else {	
 			foreach($parts AS $i){
 				if(!isset($pointer->$i)){
@@ -181,8 +191,10 @@ class Config {
 		} else {
 			$before = $pointer->$key;
 		}		
-		$pointer->$key = $set;
-		$this->triggerSetEvent($path,$before,$set,$module,$namespace);
+		if($pointer->$key != $set){
+			$pointer->$key = $set;
+			$this->triggerSetEvent($path,$module,$namespace);
+		}
 	}	
 	
 	/**

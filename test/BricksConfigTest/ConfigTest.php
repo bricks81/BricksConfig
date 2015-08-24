@@ -24,16 +24,16 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	public function testArray(){
 		$config = $this->getTestConfig();		
 		$array = $config->getArray();
-		$this->assertEquals($array,$this->testConfig);
+		$this->assertEquals($array,Bootstrap::getServiceManager()->get('Config')['BricksConfig']);
 		
 		$cfg = $config->getConfig('BricksConfig');
 		$array = $cfg->getArray();
-		$this->assertEquals($array,$this->testConfig['BricksConfig']['BricksConfig']['BricksConfig']);
+		$this->assertEquals($array,Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfig']);
 
 		$array = $cfg->getArray('BricksConfigTest');
 		$this->assertEquals($array,array_replace_recursive(
-			$this->testConfig['BricksConfig']['BricksConfig']['BricksConfig'],
-			$this->testConfig['BricksConfig']['BricksConfig']['BricksConfigTest']
+			Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfig'],
+			Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfigTest']
 		));
 	}
 	
@@ -42,7 +42,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$cfg = $config->getConfig('BricksConfig');
 		$this->assertTrue($cfg->get('testArray.multiple.bool'));
 		$this->assertFalse($cfg->get('testArray.multiple.bool','BricksConfigTest'));
-		$array = &$this->testConfig['BricksConfig']['BricksConfig']['BricksConfig']['array'];
+		$array = Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfig']['array'];
 		$this->assertEquals($array,$cfg->get('array'));
 		$array = &$array['array'];
 		$this->assertEquals($array,$cfg->get('array.array'));
