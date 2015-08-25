@@ -39,7 +39,7 @@ class ConfigFactory implements FactoryInterface {
 	 */
 	public function createService(ServiceLocatorInterface $sl){
 		$zconfig = $sl->get('Config');				
-		$configClass = $zconfig->BricksConfig->BricksConfig->BricksConfig->configClass;
+		$configClass = $zconfig['BricksConfig']['BricksConfig']['BricksConfig']['configClass'];
 		$service = new $configClass($zconfig);
 		if($sl->has('EventManager')){
 			$service->setEventManager($sl->get('EventManager'));
