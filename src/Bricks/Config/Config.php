@@ -99,19 +99,17 @@ class Config {
 		$data = array();
 		if(null===$module){
 			$data = $this->zconfig->BricksConfig->toArray();
-		} elseif(null===$namespace){
-			if(!isset($this->zconfig->BricksConfig->$module)){
-				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
-			}
-			$data = $this->zconfig->BricksConfig->$module->toArray();
 		} else {
 			if(!isset($this->zconfig->BricksConfig->$module)){
 				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
 			}
-			$data = array_replace_recursive(
-				$this->zconfig->BricksConfig->$module->$module->toArray(),
-				$this->zconfig->BricksConfig->$module->$namespace->toArray()
-			);
+			$data = $this->zconfig->BricksConfig->$module->toArray();
+			if(null !== $namespace && isset($this->zconfig->BricksConfig->$module->$namespace)){
+				$data = array_replace_recursive(
+					$data,
+					$this->zconfig->BricksConfig->$module->$namespace->toArray()
+				);
+			}
 		}		
 		return $data;
 	}
