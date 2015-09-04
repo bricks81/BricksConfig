@@ -100,10 +100,10 @@ class Config {
 		if(null===$module){
 			$data = $this->zconfig->BricksConfig->toArray();
 		} else {
-			if(!isset($this->zconfig->BricksConfig->$module)){
+			if(!isset($this->zconfig->BricksConfig->$module->$module)){
 				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
 			}
-			$data = $this->zconfig->BricksConfig->$module->toArray();
+			$data = $this->zconfig->BricksConfig->$module->$module->toArray();
 			if(null !== $namespace && isset($this->zconfig->BricksConfig->$module->$namespace)){
 				$data = array_replace_recursive(
 					$data,
