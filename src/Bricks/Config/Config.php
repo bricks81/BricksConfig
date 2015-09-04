@@ -99,6 +99,11 @@ class Config {
 		$data = array();
 		if(null===$module){
 			$data = $this->zconfig->BricksConfig->toArray();
+		} elseif(null == $namespace){
+			if(!isset($this->zconfig->BricksConfig->$module)){
+				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
+			}
+			$data = $this->zconfig->BricksConfig->$module->toArray();
 		} else {
 			if(!isset($this->zconfig->BricksConfig->$module->$module)){
 				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
