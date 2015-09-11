@@ -33,7 +33,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(true,$cfg->get('testArray.multiple.bool','BricksConfig'));
 		$this->assertEquals(false,$cfg->get('testArray.multiple.bool','BricksConfigTest'));
 		
-		$this->assertEquals('test',$cfg->get('onlyHere'));
+		$this->assertEquals(null,$cfg->get('onlyHere'));
 		$this->assertEquals('test',$cfg->get('onlyHere','BricksConfigTest'));
 		$this->assertEquals('test2',$cfg->get('onlyHere','BricksConfigTest2'));
 		

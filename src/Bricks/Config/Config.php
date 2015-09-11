@@ -90,23 +90,6 @@ class Config {
 	}
 	
 	/**
-	 * @param array $data
-	 * @param array $array
-	 * @return array
-	 */
-	protected function mergeRecursive($data,$array){
-		$return = $data;
-		foreach($array AS $key => $value){
-			if(is_array($value) && isset($data[$key])){
-				$return[$key] = $this->mergeRecursive($data[$key], $array[$key]);
-			} elseif(!isset($data[$key])) {
-				$return[$key] = $value;
-			}
-		}
-		return $return;
-	}
-	
-	/**
 	 * @param string $module
 	 * @param string $namespace
 	 * @return array
@@ -124,9 +107,6 @@ class Config {
 		if(isset($this->zconfig->BricksConfig->$module->$namespace)){
 			$data = array_merge($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
 		}
-		foreach($this->zconfig->BricksConfig->$module->toArray() AS $ns => $d){
-			$data = $this->mergeRecursive($data,$d);
-		}		
 		return $data;
 	}
 	
