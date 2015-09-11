@@ -19,11 +19,16 @@ return array(
 				),
 			),
 			'BricksConfigTest' => array(
+				'configClass' => 'Bricks\Config\Config2',
 				'testArray' => array(
 					'multiple' => array(
 						'bool' => false,
 					),
-				),					
+				),		
+				'onlyHere' => 'test',			
+			),
+			'BricksConfigTest2' => array(
+				'onlyHere' => 'test2',
 			),
 		),		
 	),

@@ -18,23 +18,25 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	
 	public function testGetInstance(){	
 		$config = $this->getTestConfig();
-		$this->assertInstanceOf('Bricks\Config\DefaultConfig',$cfg = $config->getConfig('BricksConfig'));			
+		$this->assertInstanceOf('Bricks\Config\DefaultConfig',$config->getConfig('BricksConfig'));			
 	}	
 	
 	public function testArray(){
 		$config = $this->getTestConfig();		
-		$array = $config->getArray();
-		$this->assertEquals($array,Bootstrap::getServiceManager()->get('Config')['BricksConfig']);
 		
-		$cfg = $config->getConfig('BricksConfig');
-		$array = $cfg->getArray();
-		$this->assertEquals($array,Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfig']);
+		$cfg = $config->getConfig('BricksConfig');		
+		$this->assertEquals('Bricks\Config\Config',$cfg->get('configClass'));
+		$this->assertEquals('Bricks\Config\Config',$cfg->get('configClass','BricksConfig'));
+		$this->assertEquals('Bricks\Config\Config2',$cfg->get('configClass','BricksConfigTest'));
 
-		$array = $cfg->getArray('BricksConfigTest');
-		$this->assertEquals($array,array_replace_recursive(
-			Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfig'],
-			Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfigTest']
-		));
+		$this->assertEquals(true,$cfg->get('testArray.multiple.bool'));
+		$this->assertEquals(true,$cfg->get('testArray.multiple.bool','BricksConfig'));
+		$this->assertEquals(false,$cfg->get('testArray.multiple.bool','BricksConfigTest'));
+		
+		$this->assertEquals('test',$cfg->get('onlyHere'));
+		$this->assertEquals('test',$cfg->get('onlyHere','BricksConfigTest'));
+		$this->assertEquals('test2',$cfg->get('onlyHere','BricksConfigTest2'));
+		
 	}
 	
 	public function testPath(){

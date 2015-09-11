@@ -110,31 +110,22 @@ class Config {
 	 * @param string $module
 	 * @param string $namespace
 	 * @return array
-	 * @throws \RuntimeException
 	 */
-	public function getArray($module=null,$namespace=null){
+	public function getArray($module,$namespace=null){
 		$data = array();
-		if(null===$module){
-			$data = $this->zconfig->BricksConfig->toArray();
-		} elseif(null == $namespace){
-			if(!isset($this->zconfig->BricksConfig->$module)){
-				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
-			}			
-			$data = $this->zconfig->BricksConfig->$module->toArray();			
-		} else {
-			if(!isset($this->zconfig->BricksConfig->$module->$module)){
-				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
-			}
-			$data = $this->zconfig->BricksConfig->$module->$module->toArray();
-			foreach($this->zconfig->BricksConfig->$module AS $namespace => $array){
-				$data = $this->mergeRecursive($data,$array);
-			}
-			if(null !== $namespace && isset($this->zconfig->BricksConfig->$module->$namespace)){
-				$data = array_replace_recursive(
-					$data,
-					$this->zconfig->BricksConfig->$module->$namespace->toArray()
-				);
-			}
+		$namespace = $namespace?:'BricksConfig';
+		if(!isset($this->zconfig->BricksConfig->$module)){
+			return $data;
+		}
+		if(!isset($this->zconfig->BricksConfig->$module->$module)){
+			return $data;
+		}
+		$data = $this->zconfig->BricksConfig->$module->$module->toArray();
+		if(isset($this->zconfig->BricksConfig->$module->$namespace)){
+			$data = array_merge($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
+		}
+		foreach($this->zconfig->BricksConfig->$module->toArray() AS $ns => $d){
+			$data = $this->mergeRecursive($data,$d);
 		}		
 		return $data;
 	}
@@ -153,27 +144,25 @@ class Config {
 		// traverse path
 		$value = null;
 		$parts = explode('.',$path);
-		$name = array_pop($parts);
+		$name = array_pop($parts);				
 		$pointer = &$data;
-		if(0 == count($parts)){
-			if(isset($pointer[$name])){
-				return $pointer[$name];
-			}
-			return null;
-		}		
-		foreach($parts AS $key){
-			if(isset($pointer[$key][$name])){
-				$value = $pointer[$key][$name];
-			}
-			if(isset($pointer[$key])){
-				$pointer = &$pointer[$key];
-			}
-		}		
-		if(isset($pointer[$name])){
-			$value = $pointer[$name];
+		$current = array_shift($parts);		
+		if(null === $current && isset($data[$name])){
+			$value = $data[$name];
+		} elseif( null !== $current){
+			while(isset($pointer[$current])){				
+				if(isset($pointer[$current][$name])){
+					$value = $pointer[$current][$name];				
+				}
+				$pointer = &$pointer[$current];
+				$current = array_shift($parts);
+				if(null == $current){
+					break;
+				}
+			}			
 		}
-		
 		return $value;
+		
 	}
 	
 	/**
