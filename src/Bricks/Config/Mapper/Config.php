@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,34 +25,8 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config\ServiceManager;
+namespace Bricks\Config\Mapper;
 
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\Config\Config;
+use Bricks\Mapper\DefaultMapper;
 
-class ConfigFactory implements FactoryInterface {
-
-	/**
-	 * (non-PHPdoc)
-	 * @see \Zend\ServiceManager\FactoryInterface::createService()
-	 */
-	public function createService(ServiceLocatorInterface $sl){
-		$zconfig = $sl->get('Config');				
-		$configClass = $zconfig['BricksConfig']['BricksConfig']['BricksConfig']['configClass'];
-		$service = new $configClass($zconfig);
-		if($sl->has('BricksMapper')){
-			$mapper = $sl->get('BricksMapper')->getMapper('Bricks\Config\Mapper\Config','BricksConfig');
-			$select = $mapper->select();
-			$collection = $mapper->collection($select);
-			foreach($collection AS $configItem){
-				$service->set($configItem->getPath(),$configItem->getValue());
-			}
-		}
-		if($sl->has('EventManager')){
-			$service->setEventManager($sl->get('EventManager'));
-		}		
-		return $service;
-	}
-	
-}
+class ConfigMapper extends DefaultMapper {}

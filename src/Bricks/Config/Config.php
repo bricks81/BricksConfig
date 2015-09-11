@@ -90,6 +90,23 @@ class Config {
 	}
 	
 	/**
+	 * @param array $data
+	 * @param array $array
+	 * @return array
+	 */
+	protected function mergeRecursive($data,$array){
+		$return = $data;
+		foreach($array AS $key => $value){
+			if(is_array($value) && isset($data[$key])){
+				$return[$key] = $this->mergeRecursive($data[$key], $array[$key]);
+			} elseif(!isset($data[$key])) {
+				$return[$key] = $value;
+			}
+		}
+		return $return;
+	}
+	
+	/**
 	 * @param string $module
 	 * @param string $namespace
 	 * @return array
@@ -102,13 +119,16 @@ class Config {
 		} elseif(null == $namespace){
 			if(!isset($this->zconfig->BricksConfig->$module)){
 				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
-			}
-			$data = $this->zconfig->BricksConfig->$module->toArray();
+			}			
+			$data = $this->zconfig->BricksConfig->$module->toArray();			
 		} else {
 			if(!isset($this->zconfig->BricksConfig->$module->$module)){
 				throw new \RuntimeException('Configuration parameter '.$module.' does not exists');
 			}
 			$data = $this->zconfig->BricksConfig->$module->$module->toArray();
+			foreach($this->zconfig->BricksConfig->$module AS $namespace => $array){
+				$data = $this->mergeRecursive($data,$array);
+			}
 			if(null !== $namespace && isset($this->zconfig->BricksConfig->$module->$namespace)){
 				$data = array_replace_recursive(
 					$data,
