@@ -105,7 +105,7 @@ class Config {
 		}
 		$data = $this->zconfig->BricksConfig->$module->$module->toArray();
 		if(isset($this->zconfig->BricksConfig->$module->$namespace)){
-			$data = array_merge($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
+			$data = array_replace_recursive($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
 		}
 		return $data;
 	}
