@@ -76,6 +76,13 @@ class Config {
 	}
 	
 	/**
+	 *  @return \Zend\Config\Config
+	 */
+	public function getZendConfig(){
+		return $this->zconfig;
+	}
+	
+	/**
 	 * @param \Zend\EventManager\EventManagerInterface $manager
 	 */
 	public function setEventManager(EventManagerInterface $manager){

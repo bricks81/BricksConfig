@@ -72,6 +72,13 @@ class DefaultConfig implements ConfigInterface {
 	}
 	
 	/**
+	 * @return \Zend\Config\Config
+	 */
+	public function getZendConfig(){
+		return $this->config->getZendConfig();
+	}
+	
+	/**
 	 * @param string $moduleName
 	 */
 	public function setModuleName($moduleName){
