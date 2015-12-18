@@ -109,6 +109,14 @@ class DefaultConfig implements ConfigInterface {
 	}
 	
 	/**
+	 * @param string $namespace
+	 * @return array
+	 */
+	public function getRootArray(){		
+		return $this->getConfig()->getRootArray($this->getModuleName());
+	}
+	
+	/**
 	 * (non-PHPdoc)
 	 * @see \Bricks\Config\ConfigInterface::get()
 	 */

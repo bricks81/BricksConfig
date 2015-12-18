@@ -98,19 +98,29 @@ class Config {
 	
 	/**
 	 * @param string $module
+	 */
+	public function getRootArray($module){
+		if(isset($this->zconfig->BricksConfig->$module)){
+			return $this->zconfig->BricksConfig->$module->toArray();
+		}		
+		return array();
+	}
+	
+	/**
+	 * @param string $module
 	 * @param string $namespace
 	 * @return array
 	 */
 	public function getArray($module,$namespace=null){
 		$data = array();
-		$namespace = $namespace?:'BricksConfig';
+		$namespace = $namespace?:'BricksConfig';		
 		if(!isset($this->zconfig->BricksConfig->$module)){
 			return $data;
 		}
 		if(!isset($this->zconfig->BricksConfig->$module->$module)){
 			return $data;
 		}
-		$data = $this->zconfig->BricksConfig->$module->$module->toArray();
+		$data = $this->zconfig->BricksConfig->$module->$module->toArray();		
 		if(isset($this->zconfig->BricksConfig->$module->$namespace)){
 			$data = array_replace_recursive($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
 		}

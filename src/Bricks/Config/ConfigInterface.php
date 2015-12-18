@@ -36,6 +36,11 @@ interface ConfigInterface {
 	public function getArray($namespace=null);
 	
 	/**
+	 * @return array
+	 */
+	public function getRootArray();
+	
+	/**
 	 * @param string $path
 	 * @param string $namespace
 	 */
