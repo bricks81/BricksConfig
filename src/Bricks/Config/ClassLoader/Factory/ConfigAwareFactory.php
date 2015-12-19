@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,36 +25,22 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config;
+namespace Bricks\Config\ClassLoader\Factory;
 
-interface ConfigInterface {
+use Bricks\ClassLoader\DefaultFactory;
+use Bricks\Config\ConfigAwareInterface;
+
+class ConfigAwareFactory extends DefaultFactory {
 	
 	/**
-	 * @return \Zend\Config\Config
+	 * {@inheritDoc}
+	 * @see \Bricks\ClassLoader\DefaultFactory::build()
 	 */
-	public function getZendConfig();
-	
-	/**
-	 * @param string $namespace
-	 */
-	public function setNamespace($namespace);
-	
-	/**
-	 * @return string
-	 */
-	public function getNamespace();
-	
-	public function resetNamespace();
-	
-	/**
-	 * @param string $path
-	 */
-	public function get($path);
-	
-	/**
-	 * @param string $path
-	 * @param mixed $value
-	 */
-	public function set($path,$value);
+	public function build($object,array $factoryParams = array()){
+		if($object instanceof ConfigAwareInterface){
+			$config = $this->getClassLoader('BricksConfig');
+			$object->setConfig($config);
+		}
+	}
 	
 }

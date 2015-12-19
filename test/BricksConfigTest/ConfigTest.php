@@ -16,49 +16,50 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		return $config;
 	}
 	
-	public function testGetInstance(){	
-		$config = $this->getTestConfig();
-		$this->assertInstanceOf('Bricks\Config\DefaultConfig',$config->getConfig('BricksConfig'));			
-	}	
-	
 	public function testArray(){
+		
 		$config = $this->getTestConfig();		
 		
-		$cfg = $config->getConfig('BricksConfig');		
-		$this->assertEquals('Bricks\Config\Config',$cfg->get('configClass'));
-		$this->assertEquals('Bricks\Config\Config',$cfg->get('configClass','BricksConfig'));
-		$this->assertEquals('Bricks\Config\Config2',$cfg->get('configClass','BricksConfigTest'));
-
-		$this->assertEquals(true,$cfg->get('testArray.multiple.bool'));
-		$this->assertEquals(true,$cfg->get('testArray.multiple.bool','BricksConfig'));
-		$this->assertEquals(false,$cfg->get('testArray.multiple.bool','BricksConfigTest'));
+		$this->assertEquals('Bricks\Config\Config',$config->get('BricksConfig.configClass'));
+		$this->assertEquals(true,$config->get('BricksConfig.testArray.multiple.bool'));
+		$this->assertEquals(null,$config->get('BricksConfig.onlyHere'));
 		
-		$this->assertEquals(null,$cfg->get('onlyHere'));
-		$this->assertEquals('test',$cfg->get('onlyHere','BricksConfigTest'));
-		$this->assertEquals('test2',$cfg->get('onlyHere','BricksConfigTest2'));
+		$config->setNamespace('BricksConfigTest');		
+		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
+		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));
+		$config->resetNamespace();
+		
+		$config->setNamespace('BricksConfigTest2');
+		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere'));
+		$config->resetNamespace();
 		
 	}
 	
 	public function testPath(){
-		$config = $this->getTestConfig();		
-		$cfg = $config->getConfig('BricksConfig');
-		$this->assertTrue($cfg->get('testArray.multiple.bool'));
-		$this->assertFalse($cfg->get('testArray.multiple.bool','BricksConfigTest'));
-		$array = Bootstrap::getServiceManager()->get('Config')['BricksConfig']['BricksConfig']['BricksConfig']['array'];
-		$this->assertEquals($array,$cfg->get('array'));
+		
+		$config = $this->getTestConfig();				
+		
+		$this->assertTrue($config->get('BricksConfig.testArray.multiple.bool'));
+		
+		$array = $config->get('BricksConfig')['array'];
+		$this->assertEquals($array,$config->get('BricksConfig.array'));
 		$array = &$array['array'];
-		$this->assertEquals($array,$cfg->get('array.array'));
+		$this->assertEquals($array,$config->get('BricksConfig.array.array'));
 		$array = &$array['array'];
-		$this->assertEquals($array,$cfg->get('array.array.array'));
+		$this->assertEquals($array,$config->get('BricksConfig.array.array.array'));
+		
 	}
 	
 	public function testSet(){
+		
 		$config = $this->getTestConfig();
-		$cfg = $config->getConfig('BricksConfig');
-		$cfg->set('array.array.array',false);
-		$this->assertFalse($cfg->get('array.array.array'));
-		$cfg->set('array.array.array',true,'BricksConfigTest');
-		$this->assertTrue($cfg->get('array.array.array','BricksConfigTest'));
+		$config->set('BricksConfig.array.array.array',false);
+		$this->assertFalse($config->get('BricksConfig.array.array.array'));
+		
+		$config->setNamespace('BricksConfigTest');
+		$config->set('BricksConfig.array.array.array',true);
+		$this->assertTrue($config->get('BricksConfig.array.array.array'));
+		$config->resetNamespace();
 		
 	}
 	

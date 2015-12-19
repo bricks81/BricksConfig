@@ -32,7 +32,22 @@ use Zend\EventManager\EventManager;
 use Zend\Mvc\Service\EventManagerFactory;
 use Zend\EventManager\EventManagerInterface;
 
-class Config {
+class Config implements ConfigInterface {
+	
+	/**
+	 * @var string
+	 */
+	protected $defaultNamespace = '__DEFAULT_NAMESPACE__';
+	
+	/**
+	 * @var string
+	 */
+	protected $namespace = '__DEFAULT_NAMESPACE__';
+	
+	/**
+	 * @var array
+	 */
+	protected $namespaceResetStack = array();
 	
 	/**
 	 * @var \Zend\Config\Config
@@ -48,31 +63,59 @@ class Config {
 	 * @var \Zend\EventManager\EventManagerInterface
 	 */
 	protected $eventManager = null;
-	
+		
 	/**
 	 * @param $zconfig
 	 */
-	public function __construct($zconfig){
+	public function __construct($zconfig,$defaultNamespace=null){
 		$this->zconfig = new ZendConfig($zconfig,true);		
+		if($defaultNamespace){
+			$this->setDefaultNamespace($namespace);
+		}
 	}
 	
 	/**
-	 * @param string $module
-	 * @return DefaultConfig | Config
+	 * @param string $namespace
 	 */
-	public function getConfig($module=null,$namespace=null){
-		if(null === $module){
-			return $this;
+	public function setDefaultNamespace($namespace){
+		$this->defaultNamespace = $namespace;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getDefaultNamespace(){
+		return $this->defaultNamespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigInterface::setNamespace()
+	 */
+	public function setNamespace($namespace){
+		array_push($this->namespaceResetStack,$this->getNamespace());
+		$this->namespace = $namespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigInterface::getNamespace()
+	 */
+	public function getNamespace(){
+		return $this->namespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigInterface::resetNamespace()
+	 */
+	public function resetNamespace(){
+		if(count($this->namespaceResetStack)){
+			$namespace = array_pop($this->namespaceResetStack);
+		} else {
+			$namespace = $this->getDefaultNamespace();
 		}
-		$namespace = $namespace?:$module;		
-		if(!isset($this->configs[$module][$namespace])){
-			$class = $this->zconfig->BricksConfig->BricksConfig->BricksConfig->defaultConfigClass;
-			if(isset($this->zconfig->BricksConfig->BricksConfig->$namespace->defaultConfigClass)){
-				$class = $this->zconfig->BricksConfig->BricksConfig->$namespace->defaultConfigClass;
-			}
-			$this->configs[$module][$namespace] = new $class($this,$module);
-		}
-		return $this->configs[$module][$namespace];
+		$this->setNamespace($namespace);
 	}
 	
 	/**
@@ -97,51 +140,33 @@ class Config {
 	}
 	
 	/**
-	 * @param string $module
-	 */
-	public function getRootArray($module){
-		if(isset($this->zconfig->BricksConfig->$module)){
-			return $this->zconfig->BricksConfig->$module->toArray();
-		}		
-		return array();
-	}
-	
-	/**
-	 * @param string $module
-	 * @param string $namespace
-	 * @return array
-	 */
-	public function getArray($module,$namespace=null){
-		$data = array();
-		$namespace = $namespace?:'BricksConfig';		
-		if(!isset($this->zconfig->BricksConfig->$module)){
-			return $data;
-		}
-		if(!isset($this->zconfig->BricksConfig->$module->$module)){
-			return $data;
-		}
-		$data = $this->zconfig->BricksConfig->$module->$module->toArray();		
-		if(isset($this->zconfig->BricksConfig->$module->$namespace)){
-			$data = array_replace_recursive($data,$this->zconfig->BricksConfig->$module->$namespace->toArray());
-		}
-		return $data;
-	}
-	
-	/**
-	 * @param string $path
-	 * @param string $module
-	 * @param string $namespace
+	 * @param string $path	 
 	 * @return mixed | null
 	 */
-	public function get($path,$module,$namespace=null){
+	public function get($path){
 		
-		// prepare data
-		$data = $this->getArray($module,$namespace);
+		$parts = explode('.',$path);
+		$module = array_shift($parts);		
+		$namespace = $this->getNamespace();
+		$defaultNamespace = $this->getDefaultNamespace();
+		
+		if(!isset($this->getZendConfig()->BricksConfig->$defaultNamespace->$module)){
+			return;
+		}
+		
+		$data = $this->getZendConfig()->BricksConfig->$defaultNamespace->$module->toArray();
+		
+		if(isset($this->getZendConfig()->BricksConfig->$namespace->$module) && $namespace != $defaultNamespace){
+			$data = array_replace_recursive($data,$this->getZendConfig()->BricksConfig->$namespace->$module->toArray());
+		}
+		
+		if($path == $module){
+			return $data;
+		}
 		
 		// traverse path
-		$value = null;
-		$parts = explode('.',$path);
-		$name = array_pop($parts);				
+		$value = null;		
+		$name = array_pop($parts);			
 		$pointer = &$data;
 		$current = array_shift($parts);		
 		if(null === $current && isset($data[$name])){
@@ -164,20 +189,18 @@ class Config {
 	
 	/**
 	 * @param string $path
-	 * @param mixed $value
-	 * @param string $module
-	 * @param string $namespace
+	 * @param mixed $value	 	 
 	 */
-	public function set($path,$value,$module,$namespace=null){
-		$namespace = $namespace?:$module;
-		if(!isset($this->zconfig->BricksConfig->$module)){
-			$this->zconfig->BricksConfig->$module = new ZendConfig(array(),true);
-		}
-		if(!isset($this->zconfig->BricksConfig->$module->$namespace)){
-			$this->zconfig->BricksConfig->$module->$namespace = new ZendConfig(array(),true);
-		}
-		$pointer = $this->zconfig->BricksConfig->$module->$namespace;
+	public function set($path,$value){		
 		$parts = explode('.',$path);
+		$module = array_shift($parts);
+		$namespace = $this->getNamespace();
+		
+		if(!isset($this->getZendConfig()->BricksConfig->$namespace->$module)){
+			$this->getZendConfig()->BricksConfig->$namespace->$module = new ZendConfig(array(),true);
+		}
+		
+		$pointer = $this->getZendConfig()->BricksConfig->$namespace->$module;		
 		$key = array_pop($parts);
 		$set = $value;
 		if(0 == count($parts)){
@@ -202,7 +225,7 @@ class Config {
 		}		
 		if($pointer->$key != $set){
 			$pointer->$key = $set;
-			$this->triggerSetEvent($path,$module,$namespace);
+			$this->triggerSetEvent($path);
 		}
 	}	
 	
@@ -212,31 +235,35 @@ class Config {
 	 * action on there own if a config value changes
 	 * 
 	 * @param string $path
-	 * @param mixed $before
-	 * @param mixed $set
-	 * @param string $module
-	 * @param string $namespace
 	 */
-	protected function triggerSetEvent($path,$module,$namespace){
+	protected function triggerSetEvent($path){
+		
 		if(null == $this->getEventManager()){
 			return;
 		}
-		$var = $this->get($path,$module,$namespace);
+		
+		$parts = explode('.',$path);
+		$module = array_shift($parts);
+		$namespace = $this->getNamespace();
+		
+		$var = $this->get($path);
 		if($var instanceof Zend_Config){
 			foreach($var AS $key => $value){
 				if($value instanceof Zend_Config){
-					$this->triggerSetEvent($path.'.'.$key,$module,$namespace);
+					$this->triggerSetEvent($path.'.'.$key);
 				} else {
 					$this->getEventManager()->trigger('BricksConfig::set('.$path.'.'.$key.')',$this,array(
+						'path' => $path.'.'.$key,
 						'module' => $module,
-						'namespace' => $namespace
+						'namespace' => $namespace,						
 					));
 				}
 			}
 		} else {
 			$this->getEventManager()->trigger('BricksConfig::set('.$path.')',$this,array(
+				'path' => $path,
 				'module' => $module,
-				'namespace' => $namespace
+				'namespace' => $namespace,
 			));
 		}
 	}

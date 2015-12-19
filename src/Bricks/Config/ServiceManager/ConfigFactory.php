@@ -38,17 +38,19 @@ class ConfigFactory implements FactoryInterface {
 	 * @see \Zend\ServiceManager\FactoryInterface::createService()
 	 */
 	public function createService(ServiceLocatorInterface $sl){
-		$zconfig = $sl->get('Config');				
-		$configClass = $zconfig['BricksConfig']['BricksConfig']['BricksConfig']['configClass'];
+		$zconfig = $sl->get('Config');
+		$configClass = $zconfig['BricksConfig']['__DEFAULT_NAMESPACE__']['BricksConfig']['configClass'];
 		$service = new $configClass($zconfig);
-		if($sl->has('BricksMapper')){
-			$mapper = $sl->get('BricksMapper')->getMapper('Bricks\Config\Mapper\Config','BricksConfig');
-			$select = $mapper->select();
-			$collection = $mapper->collection($select);
-			foreach($collection AS $configItem){
-				$service->set($configItem->getPath(),$configItem->getValue());
+		if($sl->has('BricksMapper') && $sl->has('BricksModel')){
+			$model = $sl->get('BricksModel')->get('Bricks\Config\Model\Collection\Config');
+			$mapper = $sl->get('BricksMapper')->get('Bricks\Config\Mapper\Collection\Config');
+			$collection = $mapper->load($model);
+			foreach($collection AS $_config){
+				$service->setNamespace($_config->getNamespace());
+				$service->set($_config->getPath(),$_config->getValue());
+				$service->resetNamespace();
 			}
-		}
+		}		
 		if($sl->has('EventManager')){
 			$service->setEventManager($sl->get('EventManager'));
 		}		

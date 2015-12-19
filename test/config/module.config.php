@@ -1,9 +1,9 @@
 <?php
 
 return array(
-	'BricksConfig' => array( // Module to use
-		'BricksConfig' => array( // Module to configure
-			'BricksConfig' => array( // Namespace
+	'BricksConfig' => array(
+		'__DEFAULT_NAMESPACE__' => array(
+			'BricksConfig' => array(
 				'configClass' => 'Bricks\Config\Config',
 				'defaultConfigClass' => 'Bricks\Config\DefaultConfig',
 				'testString' => 'test',
@@ -18,7 +18,9 @@ return array(
 					),
 				),
 			),
-			'BricksConfigTest' => array(
+		),
+		'BricksConfigTest' => array(
+			'BricksConfig' => array(
 				'configClass' => 'Bricks\Config\Config2',
 				'testArray' => array(
 					'multiple' => array(
@@ -27,7 +29,9 @@ return array(
 				),		
 				'onlyHere' => 'test',			
 			),
-			'BricksConfigTest2' => array(
+		),
+		'BricksConfigTest2' => array(
+			'BricksConfig' => array(
 				'onlyHere' => 'test2',
 			),
 		),		
