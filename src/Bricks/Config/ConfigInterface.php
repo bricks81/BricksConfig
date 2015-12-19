@@ -44,17 +44,22 @@ interface ConfigInterface {
 	 */
 	public function getNamespace();
 	
+	/**
+	 * Resets the Namespace to the last known
+	 */
 	public function resetNamespace();
 	
 	/**
 	 * @param string $path
+	 * @param string $namespace
 	 */
-	public function get($path);
+	public function get($path,$namespace=null);
 	
 	/**
 	 * @param string $path
 	 * @param mixed $value
+	 * @param string $namespace
 	 */
-	public function set($path,$value);
+	public function set($path,$value,$namespace=null);
 	
 }

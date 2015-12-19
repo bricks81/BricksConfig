@@ -140,14 +140,18 @@ class Config implements ConfigInterface {
 	}
 	
 	/**
-	 * @param string $path	 
-	 * @return mixed | null
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigInterface::get()
 	 */
-	public function get($path){
+	public function get($path,$namespace=null){
+		
+		if(null!==$namespace){
+			$this->setNamespace($namespace);
+		}
 		
 		$parts = explode('.',$path);
 		$module = array_shift($parts);		
-		$namespace = $this->getNamespace();
+		$_namespace = $this->getNamespace();
 		$defaultNamespace = $this->getDefaultNamespace();
 		
 		if(!isset($this->getZendConfig()->BricksConfig->$defaultNamespace->$module)){
@@ -156,8 +160,8 @@ class Config implements ConfigInterface {
 		
 		$data = $this->getZendConfig()->BricksConfig->$defaultNamespace->$module->toArray();
 		
-		if(isset($this->getZendConfig()->BricksConfig->$namespace->$module) && $namespace != $defaultNamespace){
-			$data = array_replace_recursive($data,$this->getZendConfig()->BricksConfig->$namespace->$module->toArray());
+		if(isset($this->getZendConfig()->BricksConfig->$_namespace->$module) && $_namespace != $defaultNamespace){
+			$data = array_replace_recursive($data,$this->getZendConfig()->BricksConfig->$_namespace->$module->toArray());
 		}
 		
 		if($path == $module){
@@ -183,6 +187,11 @@ class Config implements ConfigInterface {
 				}
 			}			
 		}
+		
+		if(null != $namespace){
+			$this->resetNamespace();
+		}
+		
 		return $value;
 		
 	}
@@ -190,17 +199,23 @@ class Config implements ConfigInterface {
 	/**
 	 * @param string $path
 	 * @param mixed $value	 	 
+	 * @param string $namespace
 	 */
-	public function set($path,$value){		
-		$parts = explode('.',$path);
-		$module = array_shift($parts);
-		$namespace = $this->getNamespace();
+	public function set($path,$value,$namespace=null){
 		
-		if(!isset($this->getZendConfig()->BricksConfig->$namespace->$module)){
-			$this->getZendConfig()->BricksConfig->$namespace->$module = new ZendConfig(array(),true);
+		if(null != $namespace){
+			$this->setNamespace($namespace);
 		}
 		
-		$pointer = $this->getZendConfig()->BricksConfig->$namespace->$module;		
+		$parts = explode('.',$path);
+		$module = array_shift($parts);
+		$_namespace = $this->getNamespace();
+		
+		if(!isset($this->getZendConfig()->BricksConfig->$_namespace->$module)){
+			$this->getZendConfig()->BricksConfig->$_namespace->$module = new ZendConfig(array(),true);
+		}
+		
+		$pointer = $this->getZendConfig()->BricksConfig->$_namespace->$module;		
 		$key = array_pop($parts);
 		$set = $value;
 		if(0 == count($parts)){
@@ -227,6 +242,11 @@ class Config implements ConfigInterface {
 			$pointer->$key = $set;
 			$this->triggerSetEvent($path);
 		}
+		
+		if(null != $namespace){
+			$this->resetNamespace();
+		}
+		
 	}	
 	
 	/**

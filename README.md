@@ -44,19 +44,19 @@ Add the configuration for your module:
 
 ```php
 	// ...
-	'BricksConfig' => array(
+	'__DEFAULT_NAMESPACE__' => array( // the default namespace
 		'YourModule' => array(
-			'YourModule' => array( // as your namespace
-				'configValue' => 'any string',
-				'a' => array(
-					'path' => array(
-						'toA' => 'value',
-					),
-				),				
-			),			
-			'ForeignNamespace' => array(
-				'configValue' => 'overwritten for this namespace',
-			),
+			'configValue' => 'any string',
+			'a' => array(
+				'path' => array(
+					'toA' => 'value',
+				),
+			),				
+		),
+	),
+	'YourNamespace' => array(
+		'YourModule' => array(
+			'configValue' => 'overwritten for this namespace',			
 		),
 	),	
 	// ...
@@ -72,15 +72,23 @@ This example will demonstrate the API that shouldn't change in future.
 	$config = $serviceManager->get('BricksConfig')->getConfig('YourModule');
 
 	// get a value
-	$config->get('a.path.toA',$optionalNamespace);
+	$config->get('a.path.toA');
 	
 	// set a value
-	$config->set('a.path.toA','myValue',$optionalNamespace);
+	$config->set('a.path.toA','myValue');
 
-	// get a array copy
-	$config->getArray($optionalNamespace);
+	// switching namespace	
+	$config->setNamespace('YourNamespace');
+	$config->get('a.path.toA');
+	$config->resetNamespace();
+
+	// or
+
+	$config->get('a.path.toA','YourNamespace');
+	$config->set('a.path.toA','value','YourNamespace');
 
 	// ...
+	
 ```
 
 ## More Documentation
