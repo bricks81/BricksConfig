@@ -7,83 +7,90 @@
 			),
 		),		
 		'BricksConfig' => array(
+			/*
 			'Test' => array(
 				'BricksConfig' => array(
 					'configClass' => 'Another',
 				),				
 			),
+			*/
 			'__DEFAULT_NAMESPACE__' => array(
 				'BricksClassLoader' => array(
 					'defaultFactories' => array(
-						'BricksConfig_ConfigAwareInterface' => array(
-							'Bricks\Config\ClassLoader\Factory\ConfigAwareFactory',
-						),
-					),
-					'aliasMap' => array(
-						'BricksConfig' => array(
-							'configMapper' => 'Bricks\Config\Mapper\Config'
-						),
-					),					
+						'Bricks\Config\ClassLoader\Factories\ConfigAwareFactory',
+					),										
 				),
 				'BricksConfig' => array(					
-					'configClass' => 'Bricks\Config\Config',					
+					'configClass' => 'Bricks\Config\Config',
+					'defaultDatabaseConfig' => array(
+						'mysqli' => array(
+							'engine' => 'InnoDB',
+							'charset' => 'utf8',
+							'collation' => 'utf8_general_ci',
+						)
+					)
 				),
-				'BricksMapper' => array(
-					'map' => array(
-						'Bricks\Config\Model\Config' => array(
-							'BricksConfig.configMapper',							
-						),
-					),
+				'BricksMapper' => array(					
 					'databases' => array(
 						'__DEFAULT_SCHEMA__' => array(
-							'table_prefix' => '',
+							/*
+							'databaseConfig' => array(
+								'mysqli' => array(									
+								),
+							),							
+							'tablePrefix' => '',
+							*/
 							'tables' => array(
 								'config' => array(
 									'columns' => array(
-										'config_id' => array(
-											'type' => 'SERIAL',
-										),
+										'config_id' => array('dataType' => 'SERIAL'),
 										'path' => array(
-											'type' => 'VARCHAR',
-											'length' => '128',
+											'dataType' => 'VARCHAR',
+											'characterMaximumLength' => '128',
 										),
 										'namespace' => array(
-											'type' => 'VARCHAR',
-											'length' => '128',
+											'dataType' => 'VARCHAR',
+											'characterMaximumLength' => '128',
 										),
 										'value_type' => array(
-											'type' => 'ENUM',
-											'values' => array(
-												'default',
-												'longtext',
-											),
-										),
-										'value' => array(
-											'type' => 'VARCHAR',
-											'length' => 255,
-										),
+											'dataType' => 'VARCHAR',
+											'characterMaximumLength' => '64',
+											'defaultValue' => 'VARCHAR',
+										),																				
 									),
-									'constraints' => array(
-										'primary_key' => array('config_id'),
-										'unique' => array('path','namespace'),
+									/*
+									'tableConfig' => array(										
 									),
+									*/
 								),
-								'config_type_longtext' => array(
+								'config_value_default' => array(
 									'columns' => array(
-										'config_Id' => array(
-											'type' => 'SERIAL',
-										),
+										'config_id' => array('dataType' => 'SERIAL'),
 										'value' => array(
-											'type' => 'LONGTEXT',
+											'dataType' => 'VARCHAR',
+											'characterMaximumLength' => '255',
 										),
-									),
-									'constraints' => array(
-										'config.config_id' => array(
-											'onUpdate' => 'CASCADE',
-											'onDelete' => 'CASCADE',
-										),
-									),
+									),									
 								),
+								'config_value_longtext' => array(
+									'columns' => array(
+										'config_id' => array('dataType' => 'SERIAL'),
+										'max_length' => array('dataType' => 'INT'),
+										'value' => array('dataType' => 'LONGTEXT'),
+									),
+								),					
+							),
+							'constraints' => array(
+								'config' => array(
+									'primary_key' => array(
+										'isPrimaryKey' => true,
+										'columns' => array('config_id'),
+									),
+									'unique_path' => array(
+										'isUnique' => true,
+										'columns' => array('path','namespace'),
+									)
+								),								
 							),
 						),
 					),

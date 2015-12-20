@@ -29,10 +29,10 @@ namespace Bricks\Config;
 
 use Zend\Config\Config as ZendConfig;
 use Zend\EventManager\EventManager;
-use Zend\Mvc\Service\EventManagerFactory;
 use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\EventManagerAwareInterface;
 
-class Config implements ConfigInterface {
+class Config implements ConfigInterface, EventManagerAwareInterface {
 	
 	/**
 	 * @var string
@@ -126,7 +126,7 @@ class Config implements ConfigInterface {
 	}
 	
 	/**
-	 * @param \Zend\EventManager\EventManagerInterface $manager
+	 * @param EventManagerInterface $manager
 	 */
 	public function setEventManager(EventManagerInterface $manager){
 		$this->eventManager = $manager;		
@@ -239,8 +239,9 @@ class Config implements ConfigInterface {
 			$before = $pointer->$key;
 		}		
 		if($pointer->$key != $set){
+			$this->triggerBeforeSetEvent($path,$set);
 			$pointer->$key = $set;
-			$this->triggerSetEvent($path);
+			$this->triggerAfterSetEvent($path);
 		}
 		
 		if(null != $namespace){
@@ -256,7 +257,7 @@ class Config implements ConfigInterface {
 	 * 
 	 * @param string $path
 	 */
-	protected function triggerSetEvent($path){
+	protected function triggerBeforeSetEvent($path,$value){
 		
 		if(null == $this->getEventManager()){
 			return;
@@ -267,25 +268,48 @@ class Config implements ConfigInterface {
 		$namespace = $this->getNamespace();
 		
 		$var = $this->get($path);
-		if($var instanceof Zend_Config){
-			foreach($var AS $key => $value){
-				if($value instanceof Zend_Config){
-					$this->triggerSetEvent($path.'.'.$key);
-				} else {
-					$this->getEventManager()->trigger('BricksConfig::set('.$path.'.'.$key.')',$this,array(
-						'path' => $path.'.'.$key,
-						'module' => $module,
-						'namespace' => $namespace,						
-					));
-				}
-			}
-		} else {
-			$this->getEventManager()->trigger('BricksConfig::set('.$path.')',$this,array(
-				'path' => $path,
+		$parts = explode('.',$path);
+		$_path = $module;
+		foreach($parts AS $key){
+			$_path .= '.'.$key;
+			$this->getEventManager()->trigger('BricksConfig::beforeSet('.$_path.')',$this,array(
+				'calledPath' => $path,
+				'currentPath' => $_path,
+				'value' => $value,
 				'module' => $module,
 				'namespace' => $namespace,
 			));
+			
 		}
+		
+	}
+	
+	/**
+	 * @param string $path
+	 */
+	protected function triggerAfterSetEvent($path){
+		
+		if(null == $this->getEventManager()){
+			return;
+		}
+		
+		$parts = explode('.',$path);
+		$module = array_shift($parts);
+		$namespace = $this->getNamespace();
+		
+		$var = $this->get($path);
+		$parts = explode('.',$path);
+		$_path = $module;
+		foreach($parts AS $key){
+			$_path .= '.'.$key;
+			$this->getEventManager()->trigger('BricksConfig::afterSet('.$_path.')',$this,array(
+				'calledPath' => $path,
+				'currentPath' => $_path,				
+				'module' => $module,
+				'namespace' => $namespace,
+			));				
+		}
+		
 	}
 	
 }
