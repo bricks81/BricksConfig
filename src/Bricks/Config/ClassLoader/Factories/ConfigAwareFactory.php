@@ -25,18 +25,22 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config;
+namespace Bricks\Config\ClassLoader\Factories;
 
-interface ConfigAwareInterface {
+use Bricks\ClassLoader\Factories\DefaultFactory;
+use Bricks\Config\ConfigAwareInterface;
+
+class ConfigAwareFactory extends DefaultFactory {
 	
 	/**
-	 * @param Config $config
+	 * {@inheritDoc}
+	 * @see \Bricks\ClassLoader\DefaultFactory::build()
 	 */
-	public function setConfig(ConfigInterface $config);
-	
-	/**
-	 * @return Config
-	 */
-	public function getConfig();
+	public function build($object,array $factoryParams = array()){
+		if($object instanceof ConfigAwareInterface){
+			$config = $this->getClassLoader()->getConfig();
+			$object->setConfig($config);
+		}
+	}
 	
 }
