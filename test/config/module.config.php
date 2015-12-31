@@ -4,8 +4,8 @@ return array(
 	'BricksConfig' => array(
 		'__DEFAULT_NAMESPACE__' => array(
 			'BricksConfig' => array(
-				'configClass' => 'Bricks\Config\Config',
-				'defaultConfigClass' => 'Bricks\Config\DefaultConfig',
+				'configService' => 'Bricks\Config\ConfigService',
+				'configClass' => 'Bricks\Config\Config\DefaultConfig',				
 				'testString' => 'test',
 				'testArray' => array(
 					'multiple' => array(

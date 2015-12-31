@@ -28,51 +28,33 @@
 namespace Bricks\Config;
 
 use Zend\Config\Config as ZendConfig;
+use Bricks\Config\Config\Config as BricksConfig;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\EventManagerAwareInterface;
+use Bricks\Config\Config\ConfigInterface;
 
-class Config implements ConfigInterface, EventManagerAwareInterface {
+class ConfigService implements ConfigServiceInterface, EventManagerAwareInterface {
 	
 	/**
 	 * @var string
 	 */
-	protected $defaultNamespace = '__DEFAULT_NAMESPACE__';
-	
-	/**
-	 * @var string
-	 */
-	protected $namespace = '__DEFAULT_NAMESPACE__';
-	
-	/**
-	 * @var array
-	 */
-	protected $namespaceResetStack = array();
+	protected $defaultNamespace;
 	
 	/**
 	 * @var \Zend\Config\Config
 	 */
 	protected $zconfig;
+		
+	/**
+	 * @var EventManagerInterface
+	 */
+	protected $eventManager;
 	
 	/**
 	 * @var array
 	 */
 	protected $configs = array();
-	
-	/**
-	 * @var \Zend\EventManager\EventManagerInterface
-	 */
-	protected $eventManager = null;
-		
-	/**
-	 * @param $zconfig
-	 */
-	public function __construct($zconfig,$defaultNamespace=null){
-		$this->zconfig = new ZendConfig($zconfig,true);		
-		if($defaultNamespace){
-			$this->setDefaultNamespace($namespace);
-		}
-	}
 	
 	/**
 	 * @param string $namespace
@@ -90,34 +72,27 @@ class Config implements ConfigInterface, EventManagerAwareInterface {
 	
 	/**
 	 * {@inheritDoc}
-	 * @see \Bricks\Config\ConfigInterface::setNamespace()
+	 * @see \Zend\EventManager\EventManagerAwareInterface::setEventManager()
 	 */
-	public function setNamespace($namespace){
-		array_push($this->namespaceResetStack,$this->getNamespace());
-		$this->namespace = $namespace;
+	public function setEventManager(EventManagerInterface $eventManager){
+		$this->eventManager = $eventManager;
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * @see \Bricks\Config\ConfigInterface::getNamespace()
+	 * @see \Zend\EventManager\EventsCapableInterface::getEventManager()
 	 */
-	public function getNamespace(){
-		return $this->namespace;
+	public function getEventManager(){
+		return $this->eventManager;
 	}
 	
 	/**
-	 * {@inheritDoc}
-	 * @see \Bricks\Config\ConfigInterface::resetNamespace()
+	 * @param array $config
 	 */
-	public function resetNamespace(){
-		if(count($this->namespaceResetStack)){
-			$namespace = array_pop($this->namespaceResetStack);
-		} else {
-			$namespace = $this->getDefaultNamespace();
-		}
-		$this->setNamespace($namespace);
+	public function setZendConfig(array $config){
+		$this->zconfig = new ZendConfig($config,true);
 	}
-	
+		
 	/**
 	 *  @return \Zend\Config\Config
 	 */
@@ -126,190 +101,199 @@ class Config implements ConfigInterface, EventManagerAwareInterface {
 	}
 	
 	/**
-	 * @param EventManagerInterface $manager
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::set()
 	 */
-	public function setEventManager(EventManagerInterface $manager){
-		$this->eventManager = $manager;		
-	}
-	
-	/**
-	 * @return \Zend\EventManager\EventManagerInterface
-	 */
-	public function getEventManager(){
-		return $this->eventManager;
+	public function setConfig(ConfigInterface $config){
+		$namespace = $config->getNamespace();
+		$this->configs[$namespace] = $config;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * @see \Bricks\Config\ConfigInterface::get()
 	 */
-	public function get($path,$namespace=null){
-		
-		if(null!==$namespace){
-			$this->setNamespace($namespace);
-		}
-		
-		$parts = explode('.',$path);
-		$module = array_shift($parts);		
-		$_namespace = $this->getNamespace();
+	public function getConfig($moduleName=null){
 		$defaultNamespace = $this->getDefaultNamespace();
-		
-		if(!isset($this->getZendConfig()->BricksConfig->$defaultNamespace->$module)){
+		$namespace = $moduleName?:$defaultNamespace;
+		if(!isset($this->configs[$namespace])){
+			$class = $this->getZendConfig()->BricksConfig->$defaultNamespace->BricksConfig->configClass;
+			if(isset($this->getZendConfig()->BricksConfig->$namespace->BricksConfig->configClass)){
+				$class = $this->getZendConfig()->BricksConfig->$namespace->BricksConfig->configClass;
+			}
+			$config = new $class($this,$namespace);		
+			if($config instanceof ConfigServiceAwareInterface){				
+				$config->setConfigService($this);
+			}
+			if(method_exists($config,'setNamespace')){
+				$config->setNamespace($namespace);
+			}			
+			$this->setConfig($config);
+		}
+		return $this->configs[$namespace];
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::get()
+	 */
+	public function get($path=null,$namespace=null){
+	
+		$parts = explode('.',$path);
+		$namespace = $namespace?:$this->getDefaultNamespace();
+		$defaultNamespace = $this->getDefaultNamespace();
+		$zendConfig = $this->getZendConfig();
+	
+		if(
+			!isset($zendConfig->BricksConfig->$defaultNamespace)
+			&& !isset($zendConfig->BricksConfig->$namespace)
+		){
 			return;
 		}
-		
-		$data = $this->getZendConfig()->BricksConfig->$defaultNamespace->$module->toArray();
-		
-		if(isset($this->getZendConfig()->BricksConfig->$_namespace->$module) && $_namespace != $defaultNamespace){
-			$data = array_replace_recursive($data,$this->getZendConfig()->BricksConfig->$_namespace->$module->toArray());
+	
+		if(isset($zendConfig->BricksConfig->$defaultNamespace)){
+			$data = $zendConfig->BricksConfig->$defaultNamespace->toArray();
 		}
-		
-		if($path == $module){
+		if(isset($zendConfig->BricksConfig->$namespace) && $namespace != $defaultNamespace){
+			$data2 = $zendConfig->BricksConfig->$namespace->toArray();
+		}
+		if(isset($data) && isset($data2)){
+			$data = array_replace_recursive($data,$data2);
+		} else if(isset($data2)){
+			$data = $data2;
+		}
+	
+		if(null == $path){
 			return $data;
 		}
-		
+	
 		// traverse path
-		$value = null;		
-		$name = array_pop($parts);			
+		$value = null;
+		$name = array_pop($parts);
 		$pointer = &$data;
-		$current = array_shift($parts);		
+		$current = array_shift($parts);
 		if(null === $current && isset($data[$name])){
 			$value = $data[$name];
 		} elseif( null !== $current){
-			while(isset($pointer[$current])){				
+			while(isset($pointer[$current])){
 				if(isset($pointer[$current][$name])){
-					$value = $pointer[$current][$name];				
+					$value = $pointer[$current][$name];
 				}
 				$pointer = &$pointer[$current];
 				$current = array_shift($parts);
 				if(null == $current){
 					break;
 				}
-			}			
+			}
 		}
-		
-		if(null != $namespace){
-			$this->resetNamespace();
-		}
-		
-		return $value;
-		
-	}
 	
+		return $value;
+	
+	}
+
 	/**
-	 * @param string $path
-	 * @param mixed $value	 	 
-	 * @param string $namespace
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::set()
 	 */
 	public function set($path,$value,$namespace=null){
-		
-		if(null != $namespace){
-			$this->setNamespace($namespace);
-		}
-		
+	
+		$namespace = $namespace?:$this->getDefaultNamespace();
 		$parts = explode('.',$path);
-		$module = array_shift($parts);
-		$_namespace = $this->getNamespace();
-		
-		if(!isset($this->getZendConfig()->BricksConfig->$_namespace->$module)){
-			$this->getZendConfig()->BricksConfig->$_namespace->$module = new ZendConfig(array(),true);
+	
+		$zendConfig = $this->getZendConfig();
+	
+		if(!isset($zendConfig->BricksConfig->$namespace)){
+			$zendConfig->BricksConfig->$namespace = new ZendConfig(array(),true);
 		}
-		
-		$pointer = $this->getZendConfig()->BricksConfig->$_namespace->$module;		
+	
+		$pointer = $zendConfig->BricksConfig->$namespace;
 		$key = array_pop($parts);
 		$set = $value;
 		if(0 == count($parts)){
 			if(is_array($value)){
 				$set = new ZendConfig($value,true);
 			}
-		} else {	
+		} else {
 			foreach($parts AS $i){
 				if(!isset($pointer->$i)){
 					$pointer->$i = new ZendConfig(array(),true);
 				}
-				$pointer = &$pointer->$i;							
+				$pointer = &$pointer->$i;
 			}
 			if(is_array($value)){
 				$set = new ZendConfig($value,true);
 			}
-		}		
+		}
 		if($pointer->$key instanceof ZendConfig){
 			$before = clone $pointer->$key;
 		} else {
 			$before = $pointer->$key;
-		}		
+		}
 		if($pointer->$key != $set){
 			$this->triggerBeforeSetEvent($path,$set);
 			$pointer->$key = $set;
 			$this->triggerAfterSetEvent($path);
 		}
-		
-		if(null != $namespace){
-			$this->resetNamespace();
-		}
-		
-	}	
+	
+	}
 	
 	/**
-	 * Will be triggered if a variable has been setted
-	 * Other classes can listen to this event in order to take
-	 * action on there own if a config value changes
-	 * 
 	 * @param string $path
+	 * @param mixed $value
+	 * @param string $namespace	 
 	 */
-	protected function triggerBeforeSetEvent($path,$value){
-		
+	protected function triggerBeforeSetEvent($path,$value,$namespace=null){
+	
 		if(null == $this->getEventManager()){
 			return;
 		}
-		
+	
 		$parts = explode('.',$path);
-		$module = array_shift($parts);
-		$namespace = $this->getNamespace();
-		
+		$realm = array_shift($parts);
+		$namespace = $namespace?:$this->getDefaultNamespace();
+	
 		$var = $this->get($path);
 		$parts = explode('.',$path);
-		$_path = $module;
+		$_path = $realm;
 		foreach($parts AS $key){
 			$_path .= '.'.$key;
 			$this->getEventManager()->trigger('BricksConfig::beforeSet('.$_path.')',$this,array(
 				'calledPath' => $path,
 				'currentPath' => $_path,
 				'value' => $value,
-				'module' => $module,
 				'namespace' => $namespace,
 			));
-			
+	
 		}
-		
+	
 	}
 	
 	/**
 	 * @param string $path
+	 * @param string $namespace
 	 */
-	protected function triggerAfterSetEvent($path){
-		
+	protected function triggerAfterSetEvent($path,$namespace=null){
+	
 		if(null == $this->getEventManager()){
 			return;
 		}
-		
+	
 		$parts = explode('.',$path);
-		$module = array_shift($parts);
-		$namespace = $this->getNamespace();
-		
+		$realm = array_shift($parts);
+		$namespace = $namespace?:$this->getDefaultNamespace();
+	
 		$var = $this->get($path);
 		$parts = explode('.',$path);
-		$_path = $module;
+		$_path = $realm;
 		foreach($parts AS $key){
 			$_path .= '.'.$key;
 			$this->getEventManager()->trigger('BricksConfig::afterSet('.$_path.')',$this,array(
 				'calledPath' => $path,
-				'currentPath' => $_path,				
-				'module' => $module,
+				'currentPath' => $_path,
 				'namespace' => $namespace,
-			));				
+			));
 		}
-		
-	}
 	
+	}
+		
 }

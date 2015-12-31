@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,41 +25,29 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config;
+namespace Bricks\Config\ClassLoader\Factories;
 
-interface ConfigInterface {
+use Bricks\ClassLoader\Factories\DefaultFactory;
+use Bricks\Config\ConfigAwareInterface;
+use Bricks\Config\ConfigServiceAwareInterface;
+use Bricks\Config\ConfigServiceInterface;
+
+class ConfigServiceAwareFactory extends DefaultFactory {
 	
 	/**
-	 * @return \Zend\Config\Config
+	 * {@inheritDoc}
+	 * @see \Bricks\ClassLoader\DefaultFactory::build()
 	 */
-	public function getZendConfig();
-	
-	/**
-	 * @param string $namespace
-	 */
-	public function setNamespace($namespace);
-	
-	/**
-	 * @return string
-	 */
-	public function getNamespace();
-	
-	/**
-	 * Resets the Namespace to the last known
-	 */
-	public function resetNamespace();
-	
-	/**
-	 * @param string $path
-	 * @param string $namespace
-	 */
-	public function get($path,$namespace=null);
-	
-	/**
-	 * @param string $path
-	 * @param mixed $value
-	 * @param string $namespace
-	 */
-	public function set($path,$value,$namespace=null);
+	public function build($object,array $factoryParams = array()){
+		if($object instanceof ConfigServiceAwareInterface){
+			foreach($factoryParams AS $mixed){
+				if($mixed instanceof ConfigServiceInterface){
+					$object->setConfigService($mixed);
+					return;
+				}
+			}
+			$object->setConfigService($this->getClassLoaderService()->getConfigService());
+		}
+	}
 	
 }

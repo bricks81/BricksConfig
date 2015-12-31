@@ -3,10 +3,11 @@
 	return array(
 		'service_manager' => array(
 			'factories' => array(
-				'BricksConfig' => 'Bricks\Config\ServiceManager\ConfigFactory',
+				'BricksConfig' => 'Bricks\Config\ServiceManager\ConfigServiceFactory',
 			),
 		),		
 		'BricksConfig' => array(
+			'defaultNamespace' => '__DEFAULT_NAMESPACE__',
 			/*
 			'Test' => array(
 				'BricksConfig' => array(
@@ -21,7 +22,8 @@
 					),										
 				),
 				'BricksConfig' => array(					
-					'configClass' => 'Bricks\Config\Config',
+					'configService' => 'Bricks\Config\ConfigService',
+					'configClass' => 'Bricks\Config\Config\DefaultConfig',
 					'defaultDatabaseConfig' => array(
 						'mysqli' => array(
 							'engine' => 'InnoDB',

@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,16 +27,52 @@
 
 namespace Bricks\Config;
 
-interface ConfigAwareInterface {
+use Bricks\Config\Config\ConfigInterface;
+
+interface ConfigServiceInterface {
 	
 	/**
-	 * @param Config $config
+	 * @return \Zend\Config\Config
+	 */
+	public function getZendConfig();
+	
+	/**
+	 * @param array $zconfig
+	 */
+	public function setZendConfig(array $zconfig);
+	
+	/**
+	 * @param string $namespace
+	 */
+	public function setDefaultNamespace($namespace);
+	
+	/**
+	 * @return string
+	 */
+	public function getDefaultNamespace();
+	
+	/**
+	 * @param ConfigInterface $config
 	 */
 	public function setConfig(ConfigInterface $config);
 	
 	/**
-	 * @return Config
+	 * @param string $moduleName as namespace
+	 * @return ConfigInterface
 	 */
-	public function getConfig();
+	public function getConfig($moduleName=null);
+	
+	/**
+	 * @param string $path
+	 * @param string $namespace
+	 */
+	public function get($path=null,$namespace=null);
+	
+	/**
+	 * @param string $path
+	 * @param mixed $value
+	 * @param string $namespace
+	 */
+	public function set($path,$value,$namespace=null);
 	
 }

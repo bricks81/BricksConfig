@@ -1,46 +1,78 @@
 <?php
 
+namespace Bricks\Config;
+
+use Bricks\Config\Config\DefaultConfig;
+class Config2 extends DefaultConfig {}
+
 namespace BricksConfigTest;
 
 use PHPUnit_Framework_TestCase;
 use Zend\Config\Config as ZendConfig;
-use Bricks\Config\Config;
+use Bricks\Config\ConfigService;
+use Bricks\Config\ConfigServiceAwareInterface;
+use Zend\EventManager\EventManagerAwareInterface;
+
 class ConfigTest extends PHPUnit_Framework_TestCase {
 	
-	public function getTestConfig(ZendConfig $zconfig=null,$eventManager=null){
+	public function getConfigService(ZendConfig $zconfig=null,$eventManager=null){
 		$zconfig = $zconfig?:Bootstrap::getServiceManager()->get('Config');
-		$config = new Config($zconfig);
-		$config->setEventManager(
-			$eventManager?:Bootstrap::getServiceManager()->get('EventManager')
-		);
-		return $config;
+		$service = new ConfigService();
+		$service->setZendConfig($zconfig);
+		$service->setDefaultNamespace('__DEFAULT_NAMESPACE__');				
+		$service->setEventManager($eventManager?:Bootstrap::getServiceManager()->get('EventManager'));
+		return $service;
 	}
 	
-	public function testArray(){
+	public function testNamespaces(){
 		
-		$config = $this->getTestConfig();		
+		$service = $this->getConfigService();		
 		
-		$this->assertEquals('Bricks\Config\Config',$config->get('BricksConfig.configClass'));
+		$config = $service->getConfig('BricksConfig');
+		
+		$this->assertEquals('BricksConfig',$config->getNamespace());		
+		$this->assertEquals('Bricks\Config\Config\DefaultConfig',$config->get('BricksConfig.configClass'));
 		$this->assertEquals(true,$config->get('BricksConfig.testArray.multiple.bool'));
 		$this->assertEquals(null,$config->get('BricksConfig.onlyHere'));
 		
-		$config->setNamespace('BricksConfigTest');		
+		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass','BricksConfigTest'));
+		$this->assertEquals('test',$config->get('BricksConfig.onlyHere','BricksConfigTest'));		
+		
+		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere','BricksConfigTest2'));		
+		
+		$this->assertEquals('BricksConfig',$config->getNamespace());
+		
+		$config->setNamespace('BricksConfigTest');
+		$this->assertEquals('BricksConfigTest',$config->getNamespace());
 		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
 		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));
-		$config->resetNamespace();
 		
 		$config->setNamespace('BricksConfigTest2');
+		$this->assertEquals('BricksConfigTest2',$config->getNamespace());
 		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere'));
-		$config->resetNamespace();
+		
+		$this->assertEquals('Bricks\Config\Config\DefaultConfig',$config->get('BricksConfig.configClass','BricksConfig'));
+		$this->assertEquals(true,$config->get('BricksConfig.testArray.multiple.bool','BricksConfig'));
+		$this->assertEquals(null,$config->get('BricksConfig.onlyHere','BricksConfig'));
+
+		$config = $service->getConfig('BricksConfigTest');
+		$this->assertEquals('BricksConfigTest',$config->getNamespace());
+		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
+		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));
+		
+		$config = $service->getConfig('BricksConfigTest2');
+		$this->assertEquals('BricksConfigTest2',$config->getNamespace());
+		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere'));
 		
 	}
 	
 	public function testPath(){
 		
-		$config = $this->getTestConfig();				
+		$service = $this->getConfigService();
+		$config = $service->getConfig('BricksConfig');
+		$this->assertEquals('BricksConfig',$config->getNamespace());
 		
-		$this->assertTrue($config->get('BricksConfig.testArray.multiple.bool'));
-		
+		$this->assertTrue($config->get('BricksConfig.testArray.multiple.bool'));		
 		$array = $config->get('BricksConfig')['array'];
 		$this->assertEquals($array,$config->get('BricksConfig.array'));
 		$array = &$array['array'];
@@ -52,15 +84,16 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	
 	public function testSet(){
 		
-		$config = $this->getTestConfig();
+		$service = $this->getConfigService();
+		$config = $service->getConfig('__DEFAULT_NAMESPACE__');
+		$this->assertEquals('__DEFAULT_NAMESPACE__',$config->getNamespace());
+		
 		$config->set('BricksConfig.array.array.array',false);
 		$this->assertFalse($config->get('BricksConfig.array.array.array'));
 		
-		$config->setNamespace('BricksConfigTest');
-		$config->set('BricksConfig.array.array.array',true);
-		$this->assertTrue($config->get('BricksConfig.array.array.array'));
-		$config->resetNamespace();
-		
+		$config->set('BricksConfig.array.array.array',true,'BricksConfigTest');
+		$this->assertTrue($config->get('BricksConfig.array.array.array','BricksConfigTest'));
+				
 	}
 	
 }

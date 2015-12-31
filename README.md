@@ -54,7 +54,7 @@ Add the configuration for your module:
 			),				
 		),
 	),
-	'YourNamespace' => array(
+	'YourNamespace' => array( // as your namespace
 		'YourModule' => array(
 			'configValue' => 'overwritten for this namespace',			
 		),
@@ -78,12 +78,6 @@ This example will demonstrate the API that shouldn't change in future.
 	$config->set('a.path.toA','myValue');
 
 	// switching namespace	
-	$config->setNamespace('YourNamespace');
-	$config->get('a.path.toA');
-	$config->resetNamespace();
-
-	// or this will do the same
-	
 	$config->get('a.path.toA','YourNamespace');
 	$config->set('a.path.toA','value','YourNamespace');
 

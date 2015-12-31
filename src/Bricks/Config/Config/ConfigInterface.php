@@ -25,36 +25,32 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config\ClassLoader\Factories;
+namespace Bricks\Config\Config;
 
-use Bricks\ClassLoader\Factories\DefaultFactory;
-use Bricks\Config\Config\ConfigInterface;
-use Bricks\Config\Config\ConfigAwareInterface;
-
-class ConfigAwareFactory extends DefaultFactory {
+interface ConfigInterface {
 	
 	/**
-	 * {@inheritDoc}
-	 * @see \Bricks\ClassLoader\DefaultFactory::build()
+	 * @param string $namespace
 	 */
-	public function build($object,array $factoryParams = array()){
-		if($object instanceof ConfigAwareInterface){
-			foreach($factoryParams AS $mixed){
-				if($mixed instanceof ConfigInterface){
-					$object->setConfig($mixed);
-					return;
-				}
-			}	
-			if(isset($factoryParams['module']) && is_string($factoryParams['module'])){
-				$object->setConfig($this->getClassLoader()->getConfigService()->getConfig($factoryParams['module']));
-				if(isset($factoryParams['namespace']) && is_string($factoryParams['namespace'])){
-					$object->getConfig()->setNamespace($factoryParams['namespace']);
-				}
-				return;
-			}			
-			$object->setConfig($this->getClassLoader()->getConfigService()->getConfig());
-		}		
-		 
-	}
+	public function setNamespace($namespace);
+	
+	/**
+	 * @return string
+	 */
+	public function getNamespace();
+	
+	/**
+	 * @param string $path
+	 * @param string $namespace
+	 * @return mixed
+	 */
+	public function get($path=null,$namespace=null);
+	
+	/**
+	 * @param string $path	 
+	 * @param mixed $value
+	 * @param string $namespace
+	 */
+	public function set($path,$value,$namespace=null);
 	
 }
