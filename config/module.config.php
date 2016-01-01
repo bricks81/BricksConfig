@@ -6,8 +6,8 @@
 				'BricksConfig' => 'Bricks\Config\ServiceManager\ConfigServiceFactory',
 			),
 		),		
+		'BricksDefaultNamespace' => '__DEFAULT_NAMESPACE__',
 		'BricksConfig' => array(
-			'defaultNamespace' => '__DEFAULT_NAMESPACE__',
 			/*
 			'Test' => array(
 				'BricksConfig' => array(

@@ -54,6 +54,11 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	/**
 	 * @var array
 	 */
+	protected $loadedModules = array('BricksConfig');
+	
+	/**
+	 * @var array
+	 */
 	protected $configs = array();
 	
 	/**
@@ -101,12 +106,33 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	}
 	
 	/**
+	 * @param array $modules
+	 */
+	public function setLoadedModules(array $modules=array()){
+		$this->loadedModules = $modules;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getLoadedModules(){
+		return $this->loadedModules;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getNamespaces(){
+		return array_keys($this->getZendConfig()->BricksConfig);
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 * @see \Bricks\Config\ConfigServiceInterface::set()
 	 */
 	public function setConfig(ConfigInterface $config){
-		$namespace = $config->getNamespace();
-		$this->configs[$namespace] = $config;
+		$module = $config->getModule();		
+		$this->configs[$module] = $config;
 	}
 	
 	/**
@@ -125,12 +151,13 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 			if($config instanceof ConfigServiceAwareInterface){				
 				$config->setConfigService($this);
 			}
-			if(method_exists($config,'setNamespace')){
+			if($config instanceof ConfigInterface){
+				$config->setModule($moduleName);
 				$config->setNamespace($namespace);
 			}			
 			$this->setConfig($config);
 		}
-		return $this->configs[$namespace];
+		return $this->configs[$moduleName];
 	}
 	
 	/**

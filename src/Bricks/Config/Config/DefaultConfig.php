@@ -40,6 +40,11 @@ class DefaultConfig implements ConfigServiceAwareInterface, ConfigInterface {
 	/**
 	 * @var string
 	 */
+	protected $module;
+	
+	/**
+	 * @var string
+	 */
 	protected $namespace;
 	
 	/**
@@ -54,6 +59,22 @@ class DefaultConfig implements ConfigServiceAwareInterface, ConfigInterface {
 	 */
 	public function getConfigService(){
 		return $this->configService;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\Config\ConfigInterface::setModule()
+	 */
+	public function setModule($module){
+		$this->module = $module;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\Config\ConfigInterface::getModule()
+	 */
+	public function getModule(){
+		return $this->module;
 	}
 	
 	/**

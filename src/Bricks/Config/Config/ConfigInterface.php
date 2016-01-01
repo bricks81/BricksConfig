@@ -30,6 +30,16 @@ namespace Bricks\Config\Config;
 interface ConfigInterface {
 	
 	/**
+	 * @param string $module
+	 */
+	public function setModule($module);
+	
+	/**
+	 * @return string
+	 */
+	public function getModule();
+	
+	/**
 	 * @param string $namespace
 	 */
 	public function setNamespace($namespace);

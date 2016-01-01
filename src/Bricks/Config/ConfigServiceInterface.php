@@ -52,6 +52,21 @@ interface ConfigServiceInterface {
 	public function getDefaultNamespace();
 	
 	/**
+	 * @param array $modules
+	 */
+	public function setLoadedModules(array $modules=array());
+	
+	/**
+	 * @return array
+	 */
+	public function getLoadedModules();
+	
+	/**
+	 * @return array
+	 */
+	public function getNamespaces();
+	
+	/**
 	 * @param ConfigInterface $config
 	 */
 	public function setConfig(ConfigInterface $config);

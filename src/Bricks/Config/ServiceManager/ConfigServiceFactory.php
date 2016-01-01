@@ -31,6 +31,7 @@ use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Config\Config;
 use Zend\EventManager\EventManagerAwareInterface;
+use Bricks\Config\ConfigServiceInterface;
 
 class ConfigServiceFactory implements FactoryInterface {
 
@@ -40,20 +41,14 @@ class ConfigServiceFactory implements FactoryInterface {
 	 */
 	public function createService(ServiceLocatorInterface $sl){
 		$zconfig = $sl->get('Config');
-		$defaultNamespace = $zconfig['BricksConfig']['defaultNamespace'];
+		$defaultNamespace = $zconfig['BricksDefaultNamespace'];
 		$configClass = $zconfig['BricksConfig'][$defaultNamespace]['BricksConfig']['configServiceClass'];
-		$service = new $configClass($sl,$defaultNamespace);
-		if(method_exists($service,'setZendConfig')){
+		$service = new $configClass();
+		if($service instanceof ConfigServiceInterface){
 			$service->setZendConfig($zconfig);
-		}
-		if(method_exists($service,'setDefaultNamespace')){
 			$service->setDefaultNamespace($defaultNamespace);
-		}
-		if($service instanceof EventManagerAwareInterface){
+			$service->setLoadedModules($sl->get('ModuleManager')->getLoadedModules());
 			$service->setEventManager($sl->get('EventManager'));
-		}
-		if(method_exists($service,'intialize')){
-			$service->initialize();
 		}
 		return $service;
 	}
