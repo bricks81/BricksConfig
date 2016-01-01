@@ -80,6 +80,11 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	 * @see \Zend\EventManager\EventManagerAwareInterface::setEventManager()
 	 */
 	public function setEventManager(EventManagerInterface $eventManager){
+		$identifiers = $eventManager->getIdentifiers();
+		if(false === array_search('BricksConfig',$identifiers)){
+			$identifiers[] = 'BricksConfig';
+		}
+		$eventManager->setIdentifiers($identifiers);
 		$this->eventManager = $eventManager;
 	}
 	
