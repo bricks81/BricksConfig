@@ -97,14 +97,31 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 				
 	}
 	
+	/**
+	 * @depends testSet
+	 */
 	public function testListeners(){		
 		$service = $this->getConfigService();
 		$config = $service->getConfig('__DEFAULT_NAMESPACE__');
-		$em = Bootstrap::getServiceManager()->get('EventManager');		
+		$em = $service->getEventManager();
+		
 		$em->getSharedManager()->attach('BricksConfig','beforeSet',function($e){
-			$this->assertEquals('BricksConfig.array.array.array',$e->getParam('path'));
+			if('BricksConfig.array.array'!=$e->getParam('path')){
+				$this->assertEquals('BricksConfig.array.array.array',$e->getParam('path'));
+			}			
+			$params = $e->getParams();
+			$params['path'] = 'BricksConfig.array.array';
+			$params['value'] = 'Another';			
+			$params['namespace'] = 'Another';			
 		});
-		$config->set('BricksConfig.array.array.array',false);
+		$em->getSharedManager()->attach('BricksConfig','afterSet',function($e){
+			$this->assertEquals('BricksConfig.array.array',$e->getParam('path'));
+			$this->assertEquals(null,$e->getParam('value'));
+			$this->assertEquals('Another',$e->getParam('namespace'));
+		});
+		$config->set('BricksConfig.array.array.array',false);		
+		
+		
 	}
 	
 }

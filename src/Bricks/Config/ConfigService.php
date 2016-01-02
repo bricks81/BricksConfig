@@ -238,7 +238,7 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 			$zendConfig->BricksConfig->$namespace = new ZendConfig(array(),true);
 		}
 	
-		$pointer = $zendConfig->BricksConfig->$namespace;
+		$pointer = &$zendConfig->BricksConfig->$namespace;
 		$key = array_pop($parts);
 		$set = $value;
 		if(0 == count($parts)){
@@ -260,43 +260,54 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 			$before = clone $pointer->$key;
 		} else {
 			$before = $pointer->$key;
-		}
-		if($pointer->$key != $set){
-			$this->triggerBeforeSetEvent($path,$set,$namespace);
-			$pointer->$key = $set;
-			$this->triggerAfterSetEvent($path,$namespace);
+		}		
+		if($pointer->$key !== $set){			
+			$pathBefore = $path;
+			$response = $this->triggerBeforeSetEvent($path,$set,$namespace);
+			if($response && $response->stopped()){
+				return;
+			}			
+			if($pathBefore != $path){				
+				$this->set($path,$set,$namespace);
+			} else {
+				$pointer->$key = $set;
+				$this->triggerAfterSetEvent($path,$before,$namespace);
+			}			
 		}
 	
 	}
 	
 	/**
-	 * @param string $path
-	 * @param mixed $value
-	 * @param string $namespace	 
+	 * @param string &$path
+	 * @param mixed &$value
+	 * @param string &$namespace	 
 	 */
-	protected function triggerBeforeSetEvent($path,$value,$namespace=null){	
+	protected function triggerBeforeSetEvent(&$path,&$value,&$namespace=null){		
 		if(null == $this->getEventManager()){
 			return;
-		}
-		$namespace = $namespace?:$this->getDefaultNamespace();				
-		$this->getEventManager()->trigger('beforeSet',$this,array(
-			'path' => $path,
-			'value' => $value,
-			'namespace' => $namespace,
-		));
+		}		
+		$namespace = $namespace?:$this->getDefaultNamespace();
+		$response = $this->getEventManager()->trigger('beforeSet',$this,array(
+			'path' => &$path,
+			'value' => &$value,
+			'namespace' => &$namespace,
+		));		
+		return $response;
 	}
 	
 	/**
 	 * @param string $path
+	 * @param string $valueBefore
 	 * @param string $namespace
 	 */
-	protected function triggerAfterSetEvent($path,$namespace=null){	
+	protected function triggerAfterSetEvent($path,$valueBefore,$namespace=null){	
 		if(null == $this->getEventManager()){
 			return;
-		}	
+		}
 		$namespace = $namespace?:$this->getDefaultNamespace();		
 		$this->getEventManager()->trigger('afterSet',$this,array(
 			'path' => $path,
+			'valueBefore' => $valueBefore,
 			'namespace' => $namespace,
 		));
 	}
