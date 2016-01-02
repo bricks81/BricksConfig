@@ -262,9 +262,9 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 			$before = $pointer->$key;
 		}
 		if($pointer->$key != $set){
-			$this->triggerBeforeSetEvent($path,$set);
+			$this->triggerBeforeSetEvent($path,$set,$namespace);
 			$pointer->$key = $set;
-			$this->triggerAfterSetEvent($path);
+			$this->triggerAfterSetEvent($path,$namespace);
 		}
 	
 	}
@@ -274,58 +274,31 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	 * @param mixed $value
 	 * @param string $namespace	 
 	 */
-	protected function triggerBeforeSetEvent($path,$value,$namespace=null){
-	
+	protected function triggerBeforeSetEvent($path,$value,$namespace=null){	
 		if(null == $this->getEventManager()){
 			return;
 		}
-	
-		$parts = explode('.',$path);
-		$realm = array_shift($parts);
-		$namespace = $namespace?:$this->getDefaultNamespace();
-	
-		$var = $this->get($path);
-		$parts = explode('.',$path);
-		$_path = $realm;
-		foreach($parts AS $key){
-			$_path .= '.'.$key;
-			$this->getEventManager()->trigger('BricksConfig::beforeSet('.$_path.')',$this,array(
-				'calledPath' => $path,
-				'currentPath' => $_path,
-				'value' => $value,
-				'namespace' => $namespace,
-			));
-	
-		}
-	
+		$namespace = $namespace?:$this->getDefaultNamespace();				
+		$this->getEventManager()->trigger('beforeSet',$this,array(
+			'path' => $path,
+			'value' => $value,
+			'namespace' => $namespace,
+		));
 	}
 	
 	/**
 	 * @param string $path
 	 * @param string $namespace
 	 */
-	protected function triggerAfterSetEvent($path,$namespace=null){
-	
+	protected function triggerAfterSetEvent($path,$namespace=null){	
 		if(null == $this->getEventManager()){
 			return;
-		}
-	
-		$parts = explode('.',$path);
-		$realm = array_shift($parts);
-		$namespace = $namespace?:$this->getDefaultNamespace();
-	
-		$var = $this->get($path);
-		$parts = explode('.',$path);
-		$_path = $realm;
-		foreach($parts AS $key){
-			$_path .= '.'.$key;
-			$this->getEventManager()->trigger('BricksConfig::afterSet('.$_path.')',$this,array(
-				'calledPath' => $path,
-				'currentPath' => $_path,
-				'namespace' => $namespace,
-			));
-		}
-	
+		}	
+		$namespace = $namespace?:$this->getDefaultNamespace();		
+		$this->getEventManager()->trigger('afterSet',$this,array(
+			'path' => $path,
+			'namespace' => $namespace,
+		));
 	}
 		
 }

@@ -17,10 +17,11 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	
 	public function getConfigService(ZendConfig $zconfig=null,$eventManager=null){
 		$zconfig = $zconfig?:Bootstrap::getServiceManager()->get('Config');
+		$em = $eventManager?:Bootstrap::getServiceManager()->get('EventManager');		
 		$service = new ConfigService();
 		$service->setZendConfig($zconfig);
 		$service->setDefaultNamespace('__DEFAULT_NAMESPACE__');				
-		$service->setEventManager($eventManager?:Bootstrap::getServiceManager()->get('EventManager'));
+		$service->setEventManager($em);		
 		return $service;
 	}
 	
@@ -94,6 +95,16 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$config->set('BricksConfig.array.array.array',true,'BricksConfigTest');
 		$this->assertTrue($config->get('BricksConfig.array.array.array','BricksConfigTest'));
 				
+	}
+	
+	public function testListeners(){		
+		$service = $this->getConfigService();
+		$config = $service->getConfig('__DEFAULT_NAMESPACE__');
+		$em = Bootstrap::getServiceManager()->get('EventManager');		
+		$em->getSharedManager()->attach('BricksConfig','beforeSet',function($e){
+			$this->assertEquals('BricksConfig.array.array.array',$e->getParam('path'));
+		});
+		$config->set('BricksConfig.array.array.array',false);
 	}
 	
 }

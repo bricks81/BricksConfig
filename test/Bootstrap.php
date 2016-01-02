@@ -24,7 +24,7 @@ class Bootstrap {
 	public static function init() {
 		putenv('APP_ENV=phpunit');
 		require './vendor/autoload.php';
-		$serviceManager = new ServiceManager(new ServiceManagerConfig());
+		$serviceManager = new ServiceManager(new ServiceManagerConfig());		
 		$serviceManager->setService('ApplicationConfig', require './config/application.config.php');
 		$serviceManager->get('ModuleManager')->loadModules();
 		static::$serviceManager = $serviceManager;
