@@ -46,8 +46,7 @@ class ConfigServiceFactory implements FactoryInterface {
 		$service = new $configClass();
 		if($service instanceof ConfigServiceInterface){
 			$service->setZendConfig($zconfig);
-			$service->setDefaultNamespace($defaultNamespace);
-			$service->setLoadedModules($sl->get('ModuleManager')->getLoadedModules());
+			$service->setDefaultNamespace($defaultNamespace);			
 			$service->setEventManager($sl->get('EventManager'));
 		}
 		return $service;

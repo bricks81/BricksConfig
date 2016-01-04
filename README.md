@@ -69,7 +69,7 @@ This example will demonstrate the API that shouldn't change in future.
 ```php
 	// ...
 	// instantiate the config for your module
-	$config = $serviceManager->get('BricksConfig')->getConfig('YourModule');
+	$config = $serviceManager->get('BricksConfig')->getConfig('YourModuleNamespace');
 
 	// get a value
 	$config->get('a.path.toA');
@@ -77,17 +77,7 @@ This example will demonstrate the API that shouldn't change in future.
 	// set a value
 	$config->set('a.path.toA','myValue');
 
-	// switching namespace	
-	$config->get('a.path.toA','YourNamespace');
-	$config->set('a.path.toA','value','YourNamespace');
-
-	// ...
-	
 ```
-
-## More Documentation
-
-Wiki: https://www.bricks-cms.org/wiki/index.php?title=BricksConfig
 
 ## Note
 

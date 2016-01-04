@@ -36,25 +36,26 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(true,$config->get('BricksConfig.testArray.multiple.bool'));
 		$this->assertEquals(null,$config->get('BricksConfig.onlyHere'));
 		
-		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass','BricksConfigTest'));
-		$this->assertEquals('test',$config->get('BricksConfig.onlyHere','BricksConfigTest'));		
+		$config = $service->getConfig('BricksConfigTest');
+		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
+		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));		
 		
-		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere','BricksConfigTest2'));		
+		$config = $service->getConfig('BricksConfigTest2')
+		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere'));		
 		
-		$this->assertEquals('BricksConfig',$config->getNamespace());
-		
-		$config->setNamespace('BricksConfigTest');
+		$config = $service->getConfig('BricksConfigTest');
 		$this->assertEquals('BricksConfigTest',$config->getNamespace());
 		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
 		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));
 		
-		$config->setNamespace('BricksConfigTest2');
+		$config = $service->getConfig('BricksConfigTest2');
 		$this->assertEquals('BricksConfigTest2',$config->getNamespace());
 		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere'));
 		
-		$this->assertEquals('Bricks\Config\Config\DefaultConfig',$config->get('BricksConfig.configClass','BricksConfig'));
-		$this->assertEquals(true,$config->get('BricksConfig.testArray.multiple.bool','BricksConfig'));
-		$this->assertEquals(null,$config->get('BricksConfig.onlyHere','BricksConfig'));
+		$config = $service->getConfig('BricksConfig');
+		$this->assertEquals('Bricks\Config\Config\DefaultConfig',$config->get('BricksConfig.configClass'));
+		$this->assertEquals(true,$config->get('BricksConfig.testArray.multiple.bool'));
+		$this->assertEquals(null,$config->get('BricksConfig.onlyHere'));
 
 		$config = $service->getConfig('BricksConfigTest');
 		$this->assertEquals('BricksConfigTest',$config->getNamespace());
@@ -92,8 +93,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$config->set('BricksConfig.array.array.array',false);
 		$this->assertFalse($config->get('BricksConfig.array.array.array'));
 		
-		$config->set('BricksConfig.array.array.array',true,'BricksConfigTest');
-		$this->assertTrue($config->get('BricksConfig.array.array.array','BricksConfigTest'));
+		$config = $service->getConfig('BricksConfigTest');
+		$config->set('BricksConfig.array.array.array',true);
+		$this->assertTrue($config->get('BricksConfig.array.array.array'));
 				
 	}
 	
@@ -104,7 +106,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$service = $this->getConfigService();
 		$config = $service->getConfig('__DEFAULT_NAMESPACE__');
 		$em = $service->getEventManager();
-		
+		$config->setNamespace('AnotherOne');
 		$em->getSharedManager()->attach('BricksConfig','beforeSet',function($e){
 			if('BricksConfig.array.array'!=$e->getParam('path')){
 				$this->assertEquals('BricksConfig.array.array.array',$e->getParam('path'));
@@ -112,12 +114,10 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 			$params = $e->getParams();
 			$params['path'] = 'BricksConfig.array.array';
 			$params['value'] = 'Another';			
-			$params['namespace'] = 'Another';			
 		});
 		$em->getSharedManager()->attach('BricksConfig','afterSet',function($e){
 			$this->assertEquals('BricksConfig.array.array',$e->getParam('path'));
-			$this->assertEquals(null,$e->getParam('value'));
-			$this->assertEquals('Another',$e->getParam('namespace'));
+			$this->assertEquals(null,$e->getParam('value'));			
 		});
 		$config->set('BricksConfig.array.array.array',false);		
 		

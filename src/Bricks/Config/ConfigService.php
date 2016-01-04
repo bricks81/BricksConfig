@@ -54,11 +54,6 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	/**
 	 * @var array
 	 */
-	protected $loadedModules = array('BricksConfig');
-	
-	/**
-	 * @var array
-	 */
 	protected $configs = array();
 	
 	/**
@@ -111,20 +106,6 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	}
 	
 	/**
-	 * @param array $modules
-	 */
-	public function setLoadedModules(array $modules=array()){
-		$this->loadedModules = $modules;
-	}
-	
-	/**
-	 * @return array
-	 */
-	public function getLoadedModules(){
-		return $this->loadedModules;
-	}
-	
-	/**
 	 * @return array
 	 */
 	public function getNamespaces(){
@@ -136,33 +117,28 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	 * @see \Bricks\Config\ConfigServiceInterface::set()
 	 */
 	public function setConfig(ConfigInterface $config){
-		$module = $config->getModule();		
-		$this->configs[$module] = $config;
+		$this->configs[$config->getNamespace()] = $config;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * @see \Bricks\Config\ConfigInterface::get()
 	 */
-	public function getConfig($moduleName=null){
+	public function getConfig($namespace=null){
 		$defaultNamespace = $this->getDefaultNamespace();
-		$namespace = $moduleName?:$defaultNamespace;
+		$namespace = $namespace?:$defaultNamespace;
 		if(!isset($this->configs[$namespace])){
 			$class = $this->getZendConfig()->BricksConfig->$defaultNamespace->BricksConfig->configClass;
 			if(isset($this->getZendConfig()->BricksConfig->$namespace->BricksConfig->configClass)){
 				$class = $this->getZendConfig()->BricksConfig->$namespace->BricksConfig->configClass;
 			}
-			$config = new $class($this,$namespace);		
+			$config = new $class($namespace);
 			if($config instanceof ConfigServiceAwareInterface){				
 				$config->setConfigService($this);
 			}
-			if($config instanceof ConfigInterface){
-				$config->setModule($moduleName);
-				$config->setNamespace($namespace);
-			}			
 			$this->setConfig($config);
 		}
-		return $this->configs[$moduleName];
+		return $this->configs[$namespace];
 	}
 	
 	/**
@@ -172,8 +148,8 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	public function get($path=null,$namespace=null){
 	
 		$parts = explode('.',$path);
-		$namespace = $namespace?:$this->getDefaultNamespace();
 		$defaultNamespace = $this->getDefaultNamespace();
+		$namespace = $namespace?:$defaultNamespace;		
 		$zendConfig = $this->getZendConfig();
 	
 		if(

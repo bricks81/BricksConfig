@@ -40,12 +40,14 @@ class DefaultConfig implements ConfigServiceAwareInterface, ConfigInterface {
 	/**
 	 * @var string
 	 */
-	protected $module;
+	protected $namespace;
 	
 	/**
-	 * @var string
+	 * @param string $namespace
 	 */
-	protected $namespace;
+	public function __construct($namespace){
+		$this->namespace = $namespace;
+	}
 	
 	/**
 	 * @param ConfigServiceInterface $config
@@ -62,29 +64,12 @@ class DefaultConfig implements ConfigServiceAwareInterface, ConfigInterface {
 	}
 	
 	/**
-	 * {@inheritDoc}
-	 * @see \Bricks\Config\Config\ConfigInterface::setModule()
+	 * @return string
 	 */
-	public function setModule($module){
-		$this->module = $module;
-	}
+	public function getDefaultNamespace(){
+		return $this->getConfigService()->getDefaultNamespace();
+	}	
 	
-	/**
-	 * {@inheritDoc}
-	 * @see \Bricks\Config\Config\ConfigInterface::getModule()
-	 */
-	public function getModule(){
-		return $this->module;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @see \Bricks\Config\Config\ConfigInterface::setNamespace()
-	 */
-	public function setNamespace($namespace){		
-		$this->namespace = $namespace;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 * @see \Bricks\Config\Config\ConfigInterface::getNamespace()
@@ -97,18 +82,16 @@ class DefaultConfig implements ConfigServiceAwareInterface, ConfigInterface {
 	 * {@inheritDoc}
 	 * @see \Bricks\Config\Config\ConfigInterface::get()
 	 */
-	public function get($path=null,$namespace=null){
-		$namespace = $namespace?:$this->getNamespace();
-		return $this->getConfigService()->get($path,$namespace);
+	public function get($path=null){		
+		return $this->getConfigService()->get($path,$this->getNamespace());
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * @see \Bricks\Config\Config\ConfigInterface::set()
 	 */
-	public function set($path,$value,$namespace=null){
-		$namespace = $namespace?:$this->getNamespace();
-		$this->getConfigService()->set($path,$value,$namespace);
+	public function set($path,$value){
+		$this->getConfigService()->set($path,$value,$this->getNamespace());
 	}
 	
 }
