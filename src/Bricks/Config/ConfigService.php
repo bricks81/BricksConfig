@@ -148,29 +148,23 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	public function get($path=null,$namespace=null){
 	
 		$parts = explode('.',$path);
+		$module = current($parts);
 		$defaultNamespace = $this->getDefaultNamespace();
 		$namespace = $namespace?:$defaultNamespace;		
 		$zendConfig = $this->getZendConfig();
 	
-		if(
-			!isset($zendConfig->BricksConfig->$defaultNamespace)
-			&& !isset($zendConfig->BricksConfig->$namespace)
-		){
+		$data = array();
+		$namespaces = array($defaultNamespace,$module,$namespace);
+		foreach($namespaces AS $namespace){
+			if(isset($zendConfig->BricksConfig->$namespace)){
+				$data = array_replace_recursive($data,$zendConfig->BricksConfig->$namespace->toArray());
+			}
+		}
+		
+		if(empty($data)){
 			return;
-		}
-	
-		if(isset($zendConfig->BricksConfig->$defaultNamespace)){
-			$data = $zendConfig->BricksConfig->$defaultNamespace->toArray();
-		}
-		if(isset($zendConfig->BricksConfig->$namespace) && $namespace != $defaultNamespace){
-			$data2 = $zendConfig->BricksConfig->$namespace->toArray();
-		}
-		if(isset($data) && isset($data2)){
-			$data = array_replace_recursive($data,$data2);
-		} else if(isset($data2)){
-			$data = $data2;
-		}
-	
+		}	
+		
 		if(null == $path){
 			return $data;
 		}
