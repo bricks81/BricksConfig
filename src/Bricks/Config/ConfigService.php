@@ -154,10 +154,10 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 		$zendConfig = $this->getZendConfig();
 	
 		$data = array();
-		$namespaces = array($defaultNamespace,$module,$namespace);
-		foreach($namespaces AS $namespace){
-			if(isset($zendConfig->BricksConfig->$namespace)){
-				$data = array_replace_recursive($data,$zendConfig->BricksConfig->$namespace->toArray());
+		$namespaces = array($defaultNamespace,$namespace);
+		foreach($namespaces AS $_namespace){
+			if(isset($zendConfig->BricksConfig->$_namespace)){
+				$data = array_replace_recursive($data,$zendConfig->BricksConfig->$_namespace->toArray());
 			}
 		}
 		
