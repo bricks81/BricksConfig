@@ -40,7 +40,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
 		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));		
 		
-		$config = $service->getConfig('BricksConfigTest2')
+		$config = $service->getConfig('BricksConfigTest2');
 		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere'));		
 		
 		$config = $service->getConfig('BricksConfigTest');
@@ -104,9 +104,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testListeners(){		
 		$service = $this->getConfigService();
-		$config = $service->getConfig('__DEFAULT_NAMESPACE__');
-		$em = $service->getEventManager();
-		$config->setNamespace('AnotherOne');
+		$config = $service->getConfig('AnotherOne');
+		$em = $service->getEventManager();		
 		$em->getSharedManager()->attach('BricksConfig','beforeSet',function($e){
 			if('BricksConfig.array.array'!=$e->getParam('path')){
 				$this->assertEquals('BricksConfig.array.array.array',$e->getParam('path'));
