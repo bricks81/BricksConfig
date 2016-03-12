@@ -5,16 +5,17 @@
 			'factories' => array(
 				'BricksConfig' => 'Bricks\Config\ServiceManager\ConfigServiceFactory',
 			),
-		),		
+		),
+		'BricksNoNamespace' => '__NO_NAMESPACE__',
+		'BricksAppendNamespace' => '__APPEND_NAMESPACE__',
 		'BricksDefaultNamespace' => '__DEFAULT_NAMESPACE__',
 		'BricksConfig' => array(
-			/*
-			'Test' => array(
+			'__NO_NAMESPACE__' => array(
 				'BricksConfig' => array(
-					'configClass' => 'Another',
-				),				
+					'configService' => 'Bricks\Config\ConfigService',
+					'configClass' => 'Bricks\Config\Config\DefaultConfig',
+				),
 			),
-			*/
 			'__DEFAULT_NAMESPACE__' => array(
 				'BricksClassLoader' => array(
 					'defaultFactories' => array(
@@ -22,8 +23,6 @@
 					),										
 				),
 				'BricksConfig' => array(					
-					'configService' => 'Bricks\Config\ConfigService',
-					'configClass' => 'Bricks\Config\Config\DefaultConfig',
 					'defaultDatabaseConfig' => array(
 						'mysqli' => array(
 							'engine' => 'InnoDB',

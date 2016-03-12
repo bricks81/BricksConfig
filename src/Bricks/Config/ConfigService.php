@@ -42,6 +42,16 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	protected $defaultNamespace;
 	
 	/**
+	 * @var string
+	 */
+	protected $noNamespace;
+	
+	/**
+	 * @var string
+	 */
+	protected $appendNamespace;
+	
+	/**
 	 * @var \Zend\Config\Config
 	 */
 	protected $zconfig;
@@ -68,6 +78,56 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	 */
 	public function getDefaultNamespace(){
 		return $this->defaultNamespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::setNoNamespace()
+	 */
+	public function setNoNamespace($namespace){
+		$this->noNamespace = $namespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::getNoNamespace()
+	 */
+	public function getNoNamespace(){
+		return $this->noNamespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::setAppendNamespace()
+	 */
+	public function setAppendNamespace($namespace){
+		$this->appendNamespace = $namespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::getAppendNamespace()
+	 */
+	public function getAppendNamespace(){
+		return $this->appendNamespace;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\ConfigServiceInterface::getAppendedNamespaces()
+	 */
+	public function getAppendedNamespaces($namespace){
+		if(isset($this->getZendConfig()->BricksConfig->{$this->getAppendNamespace()}->$namespace)){
+			$valid = $this->getNamespaces();
+			$namespaces = $this->getZendConfig()->BricksConfig->{$this->getAppendNamespace()}->$namespace->toArray();
+			foreach($namespaces AS $key => $namespace){
+				if(false === array_search($namespace,$valid)){
+					unset($namespaces[$key]);
+				}
+			}
+			return $namespaces;
+		}
+		return array();
 	}
 	
 	/**
@@ -109,8 +169,14 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	 * @return array
 	 */
 	public function getNamespaces(){
-		return array_keys($this->getZendConfig()->BricksConfig);
-	}
+		$namespaces = array_keys($this->getZendConfig()->BricksConfig->toArray());
+		foreach($namespaces AS $key => $namespace){
+			if(substr($namespace,0,2) == '__'){
+				unset($namespaces[$key]);
+			}
+		}		
+		return $namespaces;
+	}	
 	
 	/**
 	 * {@inheritDoc}
@@ -128,10 +194,7 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 		$defaultNamespace = $this->getDefaultNamespace();
 		$namespace = $namespace?:$defaultNamespace;
 		if(!isset($this->configs[$namespace])){
-			$class = $this->getZendConfig()->BricksConfig->$defaultNamespace->BricksConfig->configClass;
-			if(isset($this->getZendConfig()->BricksConfig->$namespace->BricksConfig->configClass)){
-				$class = $this->getZendConfig()->BricksConfig->$namespace->BricksConfig->configClass;
-			}
+			$class = $this->getZendConfig()->BricksConfig->{$this->getNoNamespace()}->BricksConfig->configClass;			
 			$config = new $class($namespace);
 			if($config instanceof ConfigServiceAwareInterface){				
 				$config->setConfigService($this);
@@ -155,6 +218,7 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 	
 		$data = array();
 		$namespaces = array($defaultNamespace,$namespace);
+		$namespaces = array_merge($namespaces,$this->getAppendedNamespaces($namespace),array($this->getNoNamespace()));
 		foreach($namespaces AS $_namespace){
 			if(isset($zendConfig->BricksConfig->$_namespace)){
 				$data = array_replace_recursive($data,$zendConfig->BricksConfig->$_namespace->toArray());

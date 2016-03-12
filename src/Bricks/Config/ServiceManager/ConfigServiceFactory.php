@@ -42,11 +42,15 @@ class ConfigServiceFactory implements FactoryInterface {
 	public function createService(ServiceLocatorInterface $sl){
 		$zconfig = $sl->get('Config');
 		$defaultNamespace = $zconfig['BricksDefaultNamespace'];
+		$noNamespace = $zconfig['BricksNoNamespace'];
+		$appendNamespace = $zconfig['BricksAppendNamespace'];
 		$configClass = $zconfig['BricksConfig'][$defaultNamespace]['BricksConfig']['configService'];
 		$service = new $configClass();
 		if($service instanceof ConfigServiceInterface){
 			$service->setZendConfig($zconfig);
 			$service->setDefaultNamespace($defaultNamespace);			
+			$service->setNoNamespace($noNamespace);
+			$service->setAppendNamespace($appendNamespace);
 			$service->setEventManager($sl->get('EventManager'));
 		}
 		return $service;

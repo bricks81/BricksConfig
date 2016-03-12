@@ -52,6 +52,32 @@ interface ConfigServiceInterface {
 	public function getDefaultNamespace();
 	
 	/**
+	 * @param string $namespace
+	 */
+	public function setNoNamespace($namespace);
+	
+	/**
+	 * @return string
+	 */
+	public function getNoNamespace();
+	
+	/**
+	 * @param string $namespace
+	 */
+	public function setAppendNamespace($namespace);
+	
+	/**
+	 * @return string
+	 */
+	public function getAppendNamespace();
+
+	/**
+	 * @param string $namespace
+	 * @return array
+	 */
+	public function getAppendedNamespaces($namespace);
+	
+	/**
 	 * @param ConfigInterface $config	 
 	 */
 	public function setConfig(ConfigInterface $config);

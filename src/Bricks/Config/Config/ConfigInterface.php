@@ -37,6 +37,21 @@ interface ConfigInterface {
 	/**
 	 * @return string
 	 */
+	public function getNoNamespace();
+	
+	/**
+	 * @return string
+	 */
+	public function getAppendNamespace();
+	
+	/**
+	 * @param array $namespaces
+	 */
+	public function getAppendedNamespaces();
+	
+	/**
+	 * @return string
+	 */
 	public function getNamespace();
 	
 	/**

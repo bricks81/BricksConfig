@@ -72,6 +72,31 @@ class DefaultConfig implements ConfigServiceAwareInterface, ConfigInterface {
 	
 	/**
 	 * {@inheritDoc}
+	 * @see \Bricks\Config\Config\ConfigInterface::getNoNamespace()
+	 */
+	public function getNoNamespace(){
+		return $this->getConfigService()->getNoNamespace();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\Config\ConfigInterface::getAppendNamespace()
+	 */
+	public function getAppendNamespace(){
+		return $this->getConfigService()->getAppendNamespace();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see \Bricks\Config\Config\ConfigInterface::getAppendedNamespaces()
+	 */
+	public function getAppendedNamespaces(){
+		$namespace = $this->getNamespace();
+		return $this->getConfigService()->getAppendedNamespaces($namespace);
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 * @see \Bricks\Config\Config\ConfigInterface::getNamespace()
 	 */
 	public function getNamespace(){

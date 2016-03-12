@@ -20,8 +20,10 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$em = $eventManager?:Bootstrap::getServiceManager()->get('EventManager');		
 		$service = new ConfigService();
 		$service->setZendConfig($zconfig);
-		$service->setDefaultNamespace('__DEFAULT_NAMESPACE__');				
-		$service->setEventManager($em);		
+		$service->setDefaultNamespace('__DEFAULT_NAMESPACE__');
+		$service->setNoNamespace('__NO_NAMESPACE__');
+		$service->setAppendNamespace('__APPEND_NAMESPACE__');
+		$service->setEventManager($em);
 		return $service;
 	}
 	
@@ -37,7 +39,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(null,$config->get('BricksConfig.onlyHere'));
 		
 		$config = $service->getConfig('BricksConfigTest');
-		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
+		$this->assertEquals('Bricks\Config\Config\DefaultConfig',$config->get('BricksConfig.configClass'));
 		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));		
 		
 		$config = $service->getConfig('BricksConfigTest2');
@@ -45,7 +47,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 		
 		$config = $service->getConfig('BricksConfigTest');
 		$this->assertEquals('BricksConfigTest',$config->getNamespace());
-		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
+		$this->assertEquals('Bricks\Config\Config\DefaultConfig',$config->get('BricksConfig.configClass'));
 		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));
 		
 		$config = $service->getConfig('BricksConfigTest2');
@@ -59,13 +61,13 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
 
 		$config = $service->getConfig('BricksConfigTest');
 		$this->assertEquals('BricksConfigTest',$config->getNamespace());
-		$this->assertEquals('Bricks\Config\Config2',$config->get('BricksConfig.configClass'));
+		$this->assertEquals('Bricks\Config\Config\DefaultConfig',$config->get('BricksConfig.configClass'));
 		$this->assertEquals('test',$config->get('BricksConfig.onlyHere'));
 		
 		$config = $service->getConfig('BricksConfigTest2');
 		$this->assertEquals('BricksConfigTest2',$config->getNamespace());
 		$this->assertEquals('test2',$config->get('BricksConfig.onlyHere'));
-		
+		$this->assertEquals('Test3',$config->get('BricksConfig.testArray.multiple.onlyHere'));
 	}
 	
 	public function testPath(){
