@@ -125,6 +125,7 @@ class ConfigService implements ConfigServiceInterface, EventManagerAwareInterfac
 					unset($namespaces[$key]);
 				}
 			}
+			$namespaces = array_unique($namespaces);
 			return $namespaces;
 		}
 		return array();
