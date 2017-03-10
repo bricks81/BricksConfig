@@ -13,10 +13,7 @@
         }
     },
     "require": {
-        "php": "^7.0",
-        "zendframework/zend-config": "*",
-        "zendframework/zend-modulemanager": "*",
-        "zendframework/zend-servicemanager": "*"
+        "php": "^7.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": false    
