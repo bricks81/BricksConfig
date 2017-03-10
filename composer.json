@@ -15,7 +15,8 @@
     "require": {
         "php": "^7.0",
         "zendframework/zend-config": "*",
-        "bricks81/bricks-event": "*"           
+        "zendframework/zend-modulemanager": "*",
+        "zendframework/zend-servicemanager": "*"
     },
     "minimum-stability": "dev",
     "prefer-stable": false    
