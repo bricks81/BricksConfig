@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,25 +25,19 @@
  * THE SOFTWARE.
  */
 
-namespace BricksConfig;
+namespace Bricks\Config;
 
-class Module {
-	
-	/**
-	 * @return array
-	 */
-	public function getConfig() {
-		return include __DIR__ . '/config/module.config.php';
-	}
-	
-	/**
-	 * @return array
-	 */
-	public function getAutoloaderConfig() {
-        return array(
-        	'Zend\Loader\ClassMapAutoloader' => array(
-        		__DIR__ . '/autoload_classmap.php',
-        	),
-        );
-    }
+interface ConfigAwareInterface {
+
+    /**
+     * @param ConfigInterface $config
+     * @return null
+     */
+    public function setBricksConfig(ConfigInterface $config);
+
+    /**
+     * @return ConfigInterface
+     */
+    public function getBricksConfig();
+
 }

@@ -25,29 +25,26 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config\ClassLoader\Factories;
+namespace Bricks\Config;
 
-use Bricks\ClassLoader\Factories\DefaultFactory;
-use Bricks\Config\ConfigAwareInterface;
-use Bricks\Config\ConfigServiceAwareInterface;
-use Bricks\Config\ConfigServiceInterface;
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
-class ConfigServiceAwareFactory extends DefaultFactory {
-	
-	/**
-	 * {@inheritDoc}
-	 * @see \Bricks\ClassLoader\DefaultFactory::build()
-	 */
-	public function build($object,array $factoryParams = array()){
-		if($object instanceof ConfigServiceAwareInterface){
-			foreach($factoryParams AS $mixed){
-				if($mixed instanceof ConfigServiceInterface){
-					$object->setConfigService($mixed);
-					return;
-				}
-			}
-			$object->setConfigService($this->getClassLoaderService()->getConfigService());
-		}
-	}
-	
+class ConfigFactory implements FactoryInterface {
+
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $modules = $container->get('ModuleManager');
+        $cfg = $container->get('Config');
+        $defaultNamespace = $cfg['bricks']['defaultNamespace'];
+        $configClass = $cfg['bricks'][$defaultNamespace]['bricks-config']['configClass'];
+        $instance = new $configClass();
+        $instance->setConfig($cfg);
+        $instance->setDefaultNamespace($defaultNamespace);
+        foreach($cfg['bricks']['namespaces'] AS $namespace){
+            $instance->addNamespace($namespace);
+        }
+        return $instance;
+    }
+
 }

@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,35 +25,49 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config\ServiceManager;
+namespace Bricks\Config;
 
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\Config\Config;
-use Zend\EventManager\EventManagerAwareInterface;
-use Bricks\Config\ConfigServiceInterface;
+/**
+ * Interface ConfigInterface
+ * @package Bricks\Config
+ */
+interface ConfigInterface {
 
-class ConfigServiceFactory implements FactoryInterface {
+    /**
+     * @return mixed
+     */
+    public function getDefaultNamespace();
 
-	/**
-	 * (non-PHPdoc)
-	 * @see \Zend\ServiceManager\FactoryInterface::createService()
-	 */
-	public function createService(ServiceLocatorInterface $sl){
-		$zconfig = $sl->get('Config');
-		$defaultNamespace = $zconfig['BricksDefaultNamespace'];
-		$noNamespace = $zconfig['BricksNoNamespace'];
-		$appendNamespace = $zconfig['BricksAppendNamespace'];
-		$configClass = $zconfig['BricksConfig'][$defaultNamespace]['BricksConfig']['configService'];
-		$service = new $configClass();
-		if($service instanceof ConfigServiceInterface){
-			$service->setZendConfig($zconfig);
-			$service->setDefaultNamespace($defaultNamespace);			
-			$service->setNoNamespace($noNamespace);
-			$service->setAppendNamespace($appendNamespace);
-			$service->setEventManager($sl->get('EventManager'));
-		}
-		return $service;
-	}
+    /**
+     * @param $namespace
+     * @return bool
+     */
+    public function addNamespace($namespace);
+
+    /**
+     * @param $namespace
+     * @return bool
+     */
+    public function removeNamespace($namespace);
+
+    /**
+     * @return array
+     */
+    public function getNamespaces();
+
+    /**
+     * @param string $path
+     * @param string $namespace
+     * @return mixed
+     */
+    public function get($path, $namespace=null);
+
+    /**
+     * @param string $path
+     * @param string $value
+     * @param string $namespace
+     * @return null
+     */
+    public function set($path, $value, $namespace=null);
 	
 }

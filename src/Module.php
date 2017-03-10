@@ -25,8 +25,30 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config\Model;
+namespace Bricks\Config;
 
-use Bricks\Model\DefaultModel;
+use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\ConfigProviderInterface;
 
-class Config extends DefaultModel {}
+class Module implements ConfigProviderInterface, AutoloaderProviderInterface {
+
+    const VERSION = '0.1.1';
+
+    public function getConfig(){
+        return array_replace_recursive(
+            require(__DIR__.'/../config/module.config.php'),
+            require(__DIR__.'/../config/bricks.config.php')
+        );
+    }
+
+    public function getAutoloaderConfig(){
+        return [
+            'Zend\Loader\StandardAutoloader' => [
+                'namespaces' => [
+                    __NAMESPACE__ => __DIR__
+                ]
+            ]
+        ];
+    }
+
+}

@@ -1,27 +1,22 @@
 {
     "name": "bricks81/bricks-config",
-    "description": "Bricks CMS Framework Configuration Managment",
+    "description": "Bricks CMS Framework - Configuration",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Sven Ullmann",
-            "email": "kontakt@28-n-half.de"
-        }
+    "keywords": [
+        "bricks",
+        "config"
     ],
-    "minimum-stability": "dev",
-    "require": {
-    	"php": ">=5.3.3",
-    	"zendframework/zend-config": "2.*@stable",
-    	"zendframework/zend-servicemanager": "2.*@stable",
-    	"zendframework/zend-modulemanager": "2.*@stable",
-    	"zendframework/zend-loader": "2.*@stable",
-    	"zendframework/zend-mvc": "2.*@stable",
-    	"zendframework/zend-view": "2.*@stable",
-    	"zendframework/zend-serializer": "2.*@stable",
-    	"zendframework/zend-log": "2.*@stable",
-    	"zendframework/zend-i18n": "2.*@stable"
-    },
+    "homepage": "https://www.bricks-cms.org",
     "autoload": {
-    	"classmap": ["Module.php"]
-    }    
+        "psr-4": {
+            "Bricks\\Config\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7.0",
+        "zendframework/zend-config": "*",
+        "bricks81/bricks-event": "*"           
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": false    
 }

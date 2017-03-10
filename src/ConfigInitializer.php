@@ -25,8 +25,18 @@
  * THE SOFTWARE.
  */
 
-namespace Bricks\Config\Mapper;
+namespace Bricks\Config;
 
-use Bricks\Mapper\DefaultMapper;
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Initializer\InitializerInterface;
 
-class ConfigMapper extends DefaultMapper {}
+class ConfigInitializer implements InitializerInterface {
+
+    public function __invoke(ContainerInterface $container, $instance)
+    {
+        if($instance instanceof ConfigAwareInterface){
+            $instance->setConfig($container->get('Bricks\Config\Config'));
+        }
+    }
+
+}
